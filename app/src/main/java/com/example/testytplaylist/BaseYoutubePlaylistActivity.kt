@@ -18,21 +18,24 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
     private val SCOPE_FILE = Scope("https://www.googleapis.com/auth/youtube")
     //private val SCOPE_FILE = Scope("https://www.googleapis.com/auth/drive.file")
     //private val SCOPE_APPFOLDER: Scope = Scope("https://www.googleapis.com/auth/drive.appdata")
-    private val SCOPE_READONLY: Scope = Scope("https://www.googleapis.com/auth/youtube.readonly")
+    //private val SCOPE_READONLY: Scope = Scope("https://www.googleapis.com/auth/youtube.readonly")
 
     //Request code for Google Sign-in
 
-    protected val REQUEST_CODE_SIGN_IN = 1
+    private val REQUEST_CODE_SIGN_IN = 1
 
     private var mToken: String? = null
     private var mCredential: GoogleAccountCredential? = null
 
     override fun onStart() {
         super.onStart()
-        signIn()
+        signIn(false)
     }
 
     // Handles resolution callbacks.
+    //val getContent = registerForActivityResult(GetContent()) { uri: Uri? ->
+    //    // Handle the returned Uri
+    //}
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -42,15 +45,15 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
                 // Sign-in may fail or be cancelled by the user. For this sample, sign-in is
                 // required and is fatal. For apps where sign-in is optional, handle
                 // appropriately
-                Log.e(TAG, "Sign-in failed.")
+                Log.e(TAG, "Sign-in failed :/ 1 $resultCode")
                 return
             }
             val getAccountTask: Task<GoogleSignInAccount> =
                 GoogleSignIn.getSignedInAccountFromIntent(data)
-            if (getAccountTask.isSuccessful()) {
-                initializeYtClient(getAccountTask.getResult())
+            if (getAccountTask.isSuccessful) {
+                initializeYtClient(getAccountTask.result)
             } else {
-                Log.e(TAG, "Sign-in failed.")
+                Log.e(TAG, "Sign-in failed. 2")
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -59,19 +62,23 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
 
     // Starts the sign-in process and initializes the Drive client.
 
-    fun signIn() {
+    fun signIn(clean: Boolean) {
         val requiredScopes: MutableSet<Scope> = HashSet(2)
         requiredScopes.add(SCOPE_FILE)
-        requiredScopes.add(SCOPE_READONLY)
+        //requiredScopes.add(SCOPE_READONLY)
         val signInAccount = GoogleSignIn.getLastSignedInAccount(this)
-        if (signInAccount != null && signInAccount.grantedScopes.containsAll(requiredScopes)) {
+        if ( !clean && signInAccount != null && signInAccount.grantedScopes.containsAll(requiredScopes)) {
+            Log.d(TAG, "Last sign in is NOT null")
             initializeYtClient(signInAccount)
         } else {
+            Log.d(TAG, "Last sign in is null")
             val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(SCOPE_FILE)
-                .requestScopes(SCOPE_READONLY)
+                .requestEmail()
+                //.requestScopes(SCOPE_READONLY)
                 .build()
             val googleSignInClient = GoogleSignIn.getClient(this, signInOptions)
+            Log.d(TAG, "DDDD start activity for result")
             startActivityForResult(googleSignInClient.signInIntent, REQUEST_CODE_SIGN_IN)
         }
     }
@@ -79,7 +86,7 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
     protected fun checkSignedIn(initClient: Boolean): Boolean {
         val requiredScopes: MutableSet<Scope> = HashSet(2)
         requiredScopes.add(SCOPE_FILE)
-        requiredScopes.add(SCOPE_READONLY)
+        //requiredScopes.add(SCOPE_READONLY)
         val signInAccount = GoogleSignIn.getLastSignedInAccount(this)
         return if (signInAccount != null && signInAccount.grantedScopes.containsAll(requiredScopes)) {
             if (initClient) {
@@ -94,7 +101,7 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
     fun signOut() {
         val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestScopes(SCOPE_FILE)
-            .requestScopes(SCOPE_READONLY)
+            //.requestScopes(SCOPE_READONLY)
             .build()
         val googleSignInClient = GoogleSignIn.getClient(this, signInOptions)
         googleSignInClient.signOut()
@@ -103,13 +110,16 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
     // Continues the sign-in process, initializing the Drive clients with the current
     // user's account.
     private fun initializeYtClient(signInAccount: GoogleSignInAccount) {
+        Log.d(TAG, "initializeYtClient")
         mCredential = GoogleAccountCredential.usingOAuth2(
             this,
-            Collections.singleton(SCOPE_FILE.getScopeUri())
+            Collections.singleton(SCOPE_FILE.scopeUri)
         )
-        mCredential?.setSelectedAccount(signInAccount.account)
-        Log.e(TAG, "" + signInAccount.account)
-        //onYtClientReady(signInAccount.displayName, signInAccount.email, signInAccount.photoUrl)
+        mCredential?.selectedAccount = signInAccount.account
+        Log.d(TAG, "DDDD the signInAccount is: " + signInAccount.account + " display:"
+                + signInAccount.displayName
+                + " email:" + signInAccount.email)
+        onYtClientReady(signInAccount.displayName, signInAccount.email, signInAccount.photoUrl)
     }
 
     fun getCredential(): GoogleAccountCredential? {

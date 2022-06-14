@@ -3,13 +3,22 @@ package com.example.testytplaylist
 //import androidx.appcompat.app.AppCompatActivity
 //import android.view.View
 
+import android.annotation.SuppressLint
 import android.net.Uri
+import android.os.AsyncTask
+//import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
+import android.widget.Toast
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
+import com.google.api.services.youtube.model.PlaylistListResponse
+import java.io.IOException
+import java.util.concurrent.Executors
 
 
 /*
@@ -84,8 +93,8 @@ class MainActivity : YouTubeBaseActivity() {
 }
  */
 
-public class MainActivity : BaseYoutubePlaylistActivity() {
-    private val APPLICATION_NAME = "Google Drive API"
+public open class MainActivity : BaseYoutubePlaylistActivity() {
+    private val APPLICATION_NAME = "YouTubePlaylist Checker"
 
     /**
      * Global instance of the HTTP transport.
@@ -97,40 +106,70 @@ public class MainActivity : BaseYoutubePlaylistActivity() {
      */
     private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
 
-    private var mDrive: YouTube? = null
+    private var mYtInst: YouTube? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val loginButton: Button = findViewById(R.id.login)
         loginButton.setOnClickListener {
-            signIn()
+            signIn(true)
         }
-        /*
-        ** TODO
-        findViewById<View>(R.id.listFile).setOnClickListener(object : OnClickListener() {
-            fun onClick(view: View?) {
-                val task: AsyncTask<Void, Void, Void> = object : AsyncTask<Void?, Void?, Void?>() {
-                    protected fun doInBackground(vararg voids: Void): Void? {
-                        try {
-                            listPlaylists()
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                        return null
-                    }
-                }
-                task.execute()
+        val playlistButton: Button = findViewById(R.id.list_playlist)
+        playlistButton.setOnClickListener {
+            try {
+                listPlaylists()
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
             }
-        })
-         */
+        }
     }
+
+    private fun listPlaylists() {
+        if (mYtInst == null) {
+            Toast.makeText(this@MainActivity , "Unable to contact Youtube service"
+                , Toast.LENGTH_LONG).show()
+            return
+        }
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        executor.execute {
+            /*
+            * Your task will be executed here
+            * you can execute anything here that
+            * you cannot execute in UI thread
+            * for example a network operation
+            * This is a background thread and you cannot
+            * access view elements here
+            *
+            * its like doInBackground()
+            * */
+
+            // Define and execute the API request
+            val request: YouTube.Playlists.List = mYtInst!!.playlists()
+                .list(mutableListOf("snippet,contentDetails"))
+            val response: PlaylistListResponse = request.setMaxResults(25L)
+                .setMine(true)
+                .execute()
+            println("DDDD")
+            println(response)
+            //handler.post {
+                /*
+                * You can perform any operation that
+                * requires UI Thread here.
+                *
+                * its like onPostExecute()
+                * */
+            //}
+        }
+    }
+
 
     /*
     **TODO
     fun listPlaylists() {
         // Print the names and IDs for up to 10 files.
-        val result: FileList = mDrive.files().list()
+        val result: FileList = mYtInst.files().list()
             .setPageSize(10)
             .setFields("nextPageToken, files(id, name)")
             .execute()
@@ -148,7 +187,7 @@ public class MainActivity : BaseYoutubePlaylistActivity() {
 
     override fun onYtClientReady(displayName: String?, email: String?, avatar: Uri?) {
         // Build a new authorized API client service.
-        mDrive = YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential())
+        mYtInst = YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential())
             .setApplicationName(APPLICATION_NAME)
             .build()
         /*

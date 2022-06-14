@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Test YT Playlist</string>
     <string name="login_button">Login</string>
+    <string name="list_playlist">List Playlist</string>
 </resources>
