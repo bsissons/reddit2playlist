@@ -3,13 +3,11 @@ package com.example.testytplaylist
 //import androidx.appcompat.app.AppCompatActivity
 //import android.view.View
 
-import android.annotation.SuppressLint
 import android.net.Uri
-import android.os.AsyncTask
-//import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import com.google.api.client.extensions.android.http.AndroidHttp
@@ -17,7 +15,11 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.PlaylistListResponse
+import com.google.common.io.Resources
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.concurrent.Executors
 
 
@@ -123,6 +125,27 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
                 e.printStackTrace()
             }
         }
+        val debugButton: Button = findViewById(R.id.test_button)
+        debugButton.setOnClickListener {
+            try {
+                val obj = JSONObject(loadJSONFromAsset())
+                //val obj = JSONObject("")
+                val userArray = obj.getJSONArray("items")
+                for (i in 0 until userArray.length()) {
+                    val playlistDetail = userArray.getJSONObject(i)
+                    val snippet = playlistDetail.getJSONObject("snippet")
+                    val title = snippet.getString("title")
+                    Log.d("MAIN", "The title of the playlist is: $title")
+                    //personName.add(userDetail.getString("name"))
+                    //emailId.add(userDetail.getString("email"))
+                    //val contact = userDetail.getJSONObject("contact")
+                    //mobileNumbers.add(contact.getString("mobile"))
+                }
+            }
+            catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun listPlaylists() {
@@ -199,5 +222,28 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
         }
          */
     }
+
+    private fun loadJSONFromAsset(): String {
+        val json: String?
+        try {
+            //val inputStream = assets.open("sample.json")
+            val inputStream = resources.assets.open("sample.json")
+            //val inputStream = Resources.getResource("sample.json")
+            val size = inputStream.available()
+            val buffer = ByteArray(size)
+            val charset = Charsets.UTF_8
+            inputStream.read(buffer)
+            inputStream.close()
+            json = String(buffer, charset)
+        }
+        catch (ex: IOException) {
+            ex.printStackTrace()
+            return ""
+        }
+
+        return json
+    }
+
+
 
 }
