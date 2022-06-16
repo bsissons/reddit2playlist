@@ -10,16 +10,18 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import com.google.android.youtube.player.*
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.PlaylistListResponse
-import com.google.common.io.Resources
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.nio.charset.Charset
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.concurrent.Executors
 
 
@@ -98,21 +100,26 @@ class MainActivity : YouTubeBaseActivity() {
 public open class MainActivity : BaseYoutubePlaylistActivity() {
     private val APPLICATION_NAME = "YouTubePlaylist Checker"
 
-    /**
-     * Global instance of the HTTP transport.
-     */
+    // Global instance of the HTTP transport.
     private val HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport()
-
-    /**
-     * Global instance of the JSON factory.
-     */
+    // * Global instance of the JSON factory.
     private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
 
+    private val API_KEY =  "AIzaSyCL91bZwoiKhAacW5uMW0RLGLU2ilFzotY"
+
     private var mYtInst: YouTube? = null
+    private var playlistUrl: String? = null
+
+    private var youtubeFragment: YouTubePlayerSupportFragmentX? = null
+    private val youtubeVideoArrayList: ArrayList<String>? = null
+    //youtube player to play video when new video selected
+    private var youTubePlayer: YouTubePlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        initializeYoutubePlayer()
+
         val loginButton: Button = findViewById(R.id.login)
         loginButton.setOnClickListener {
             signIn(true)
@@ -145,7 +152,82 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
             catch (e: JSONException) {
                 e.printStackTrace()
             }
+
+            getRedirectUrl("https://www.youtube.com/watch_videos?video_ids=AwyRYse4kss,QoitiIbdeaM,drlB2RT_XiA")
+            // Final URL will look like: https://m.youtube.com/watch?v=AwyRYse4kss&list=TLGGShmZwWHrpk0xNjA2MjAyMg
+
+
         }
+    }
+
+    /*
+    //val youtubeFragment : YouTubePlayerFragment
+        //    = supportFragmentManager.findFragmentById(R.id.youtubeFragment)
+        val youtubeFragment  : YouTubePlayerFragment = YouTubePlayerFragment(supportFragmentManager.findFragmentById(R.id.youtubeFragment))
+        youtubeFragment.initialize(API_KEY, object : YouTubePlayer.OnInitializedListener{
+            // Implement two methods by clicking on red error bulb
+            // inside onInitializationSuccess method
+            // add the video link or the
+            // playlist link that you want to play
+            // In here we also handle the play and pause functionality
+            override fun onInitializationSuccess(
+                provider: YouTubePlayer.Provider?,
+                player: YouTubePlayer?,
+                p2: Boolean
+            ) {
+                player?.loadVideo("dQw4w9WgXcQ")
+                //player?.loadVideo("HzeK7g8cD0Y")
+                player?.play()
+            }
+
+            // Inside onInitializationFailure
+            // implement the failure functionality
+            // Here we will show toast
+            override fun onInitializationFailure(
+                p0: YouTubePlayer.Provider?,
+                p1: YouTubeInitializationResult?
+            ) {
+                Toast.makeText(this@MainActivity , "Video player Failed" , Toast.LENGTH_SHORT).show()
+            }
+        })
+     */
+
+    private fun initializeYoutubePlayer() {
+        //val youTubePlayerFragment = supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragment? ?: return
+        youtubeFragment = supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragmentX? ?: return
+
+        youtubeFragment!!.initialize(
+            API_KEY,
+            object : YouTubePlayer.OnInitializedListener {
+                override fun onInitializationSuccess(
+                    provider: YouTubePlayer.Provider?,
+                    player: YouTubePlayer?,
+                    wasRestored: Boolean
+                ) {
+                    if (!wasRestored) {
+                        youTubePlayer = player
+                        //set the player style default
+                        youTubePlayer?.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT)
+                        //cue the 1st video by default
+                        //youTubePlayer.cueVideo(youtubeVideoArrayList.get(0))
+                        youTubePlayer?.loadVideo("dQw4w9WgXcQ")
+                    }
+                    youTubePlayer?.play()
+                    //player?.loadVideo("dQw4w9WgXcQ")
+                    //player?.loadVideo("HzeK7g8cD0Y")
+                    //player?.play()
+                }
+
+                // Inside onInitializationFailure
+                // implement the failure functionality
+                // Here we will show toast
+                override fun onInitializationFailure(
+                    p0: YouTubePlayer.Provider?,
+                    p1: YouTubeInitializationResult?
+                ) {
+                    Toast.makeText(this@MainActivity , "Video player Failed" , Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     private fun listPlaylists() {
@@ -244,6 +326,39 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
         return json
     }
 
-
+    private fun getRedirectUrl(url:String) : String {
+        var finalUrl = "";
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        executor.execute {
+            var urlTmp: URL? = null
+            var redUrl: String? = null
+            var connection: HttpURLConnection? = null
+            try {
+                urlTmp = URL(url)
+            } catch (e1: MalformedURLException) {
+                e1.printStackTrace()
+            }
+            try {
+                connection = urlTmp!!.openConnection() as HttpURLConnection
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            try {
+                connection!!.responseCode
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            redUrl = connection!!.url.toString()
+            connection.disconnect()
+            finalUrl = redUrl
+            Log.d("MAIN","DDDD url is $redUrl")
+            //return redUrl
+        }
+        //handler.post {
+        //    Log.d("Redirected URL",""+result)
+        //}
+        return finalUrl
+    }
 
 }

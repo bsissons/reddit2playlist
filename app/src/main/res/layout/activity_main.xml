@@ -23,8 +23,10 @@
         android:text="@string/list_playlist"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/youtubeFragment"
+        app:layout_constraintVertical_bias="0.674" />
 
     <Button
         android:id="@+id/test_button"
@@ -32,8 +34,19 @@
         android:layout_height="wrap_content"
         android:text="@string/test_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/list_playlist"
-        tools:layout_editor_absoluteX="161dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/list_playlist" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/youtubeFragment"
+        android:name="com.google.android.youtube.player.YouTubePlayerSupportFragmentX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!--
     <com.google.android.youtube.player.YouTubePlayerView
