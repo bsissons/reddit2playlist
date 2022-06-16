@@ -1,8 +1,5 @@
 package com.example.testytplaylist
 
-//import androidx.appcompat.app.AppCompatActivity
-//import android.view.View
-
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -24,81 +21,10 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.util.concurrent.Executors
 
-
-/*
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-    }
-}
-
- */
-
-
-/*
-class MainActivity : YouTubeBaseActivity() {
-
-    // Change the AppCompactActivity to YouTubeBaseActivity()
-
-    // Add the api key that you had
-    // copied from google API
-    // This is a dummy api key
-    private val apiKey =  "AIzaSyCL91bZwoiKhAacW5uMW0RLGLU2ilFzotY"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        // Get reference to the view of Video player
-        val ytPlayer = findViewById<YouTubePlayerView>(R.id.ytPlayer)
-
-        ytPlayer.initialize(apiKey, object : YouTubePlayer.OnInitializedListener{
-            // Implement two methods by clicking on red error bulb
-            // inside onInitializationSuccess method
-            // add the video link or the
-            // playlist link that you want to play
-            // In here we also handle the play and pause functionality
-            override fun onInitializationSuccess(
-                provider: YouTubePlayer.Provider?,
-                player: YouTubePlayer?,
-                p2: Boolean
-            ) {
-                player?.loadVideo("dQw4w9WgXcQ")
-                //player?.loadVideo("HzeK7g8cD0Y")
-                player?.play()
-            }
-
-            // Inside onInitializationFailure
-            // implement the failure functionality
-            // Here we will show toast
-            override fun onInitializationFailure(
-                p0: YouTubePlayer.Provider?,
-                p1: YouTubeInitializationResult?
-            ) {
-                Toast.makeText(this@MainActivity , "Video player Failed" , Toast.LENGTH_SHORT).show()
-            }
-        })
-
-        val loginButton: Button = findViewById(R.id.login)
-        loginButton.setOnClickListener {
-            val ytActivity = BaseYoutubePlaylistActivity()
-            ytActivity.signIn()
-        }
-        //findViewById<View>(R.id.login).setOnClickListener(View.OnClickListener() {
-        //    fun onClick(view: View?) {
-        //        signIn()
-        //    }
-        //})
-
-        //val playlist = PlaylistList()
-        //playlist.printPlaylists(applicationContext)
-    }
-}
- */
-
-public open class MainActivity : BaseYoutubePlaylistActivity() {
+open class MainActivity : BaseYoutubePlaylistActivity() {
     private val APPLICATION_NAME = "YouTubePlaylist Checker"
+
+    private val PLAYLIST_PATH = "https://www.youtube.com/watch_videos?video_ids=AwyRYse4kss,QoitiIbdeaM,drlB2RT_XiA"
 
     // Global instance of the HTTP transport.
     private val HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport()
@@ -118,6 +44,7 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //createStandalonePlayer()
         initializeYoutubePlayer()
 
         val loginButton: Button = findViewById(R.id.login)
@@ -134,68 +61,45 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
         }
         val debugButton: Button = findViewById(R.id.test_button)
         debugButton.setOnClickListener {
-            try {
-                val obj = JSONObject(loadJSONFromAsset())
-                //val obj = JSONObject("")
-                val userArray = obj.getJSONArray("items")
-                for (i in 0 until userArray.length()) {
-                    val playlistDetail = userArray.getJSONObject(i)
-                    val snippet = playlistDetail.getJSONObject("snippet")
-                    val title = snippet.getString("title")
-                    Log.d("MAIN", "The title of the playlist is: $title")
-                    //personName.add(userDetail.getString("name"))
-                    //emailId.add(userDetail.getString("email"))
-                    //val contact = userDetail.getJSONObject("contact")
-                    //mobileNumbers.add(contact.getString("mobile"))
-                }
-            }
-            catch (e: JSONException) {
-                e.printStackTrace()
-            }
-
-            getRedirectUrl("https://www.youtube.com/watch_videos?video_ids=AwyRYse4kss,QoitiIbdeaM,drlB2RT_XiA")
-            // Final URL will look like: https://m.youtube.com/watch?v=AwyRYse4kss&list=TLGGShmZwWHrpk0xNjA2MjAyMg
-
-
+            runDebugButton()
         }
     }
 
-    /*
-    //val youtubeFragment : YouTubePlayerFragment
-        //    = supportFragmentManager.findFragmentById(R.id.youtubeFragment)
-        val youtubeFragment  : YouTubePlayerFragment = YouTubePlayerFragment(supportFragmentManager.findFragmentById(R.id.youtubeFragment))
-        youtubeFragment.initialize(API_KEY, object : YouTubePlayer.OnInitializedListener{
-            // Implement two methods by clicking on red error bulb
-            // inside onInitializationSuccess method
-            // add the video link or the
-            // playlist link that you want to play
-            // In here we also handle the play and pause functionality
-            override fun onInitializationSuccess(
-                provider: YouTubePlayer.Provider?,
-                player: YouTubePlayer?,
-                p2: Boolean
-            ) {
-                player?.loadVideo("dQw4w9WgXcQ")
-                //player?.loadVideo("HzeK7g8cD0Y")
-                player?.play()
+    private fun runDebugButton() {
+        try {
+            val obj = JSONObject(loadJSONFromAsset())
+            //val obj = JSONObject("")
+            val userArray = obj.getJSONArray("items")
+            for (i in 0 until userArray.length()) {
+                val playlistDetail = userArray.getJSONObject(i)
+                val snippet = playlistDetail.getJSONObject("snippet")
+                val title = snippet.getString("title")
+                Log.d("MAIN", "The title of the playlist is: $title")
+                //personName.add(userDetail.getString("name"))
+                //emailId.add(userDetail.getString("email"))
+                //val contact = userDetail.getJSONObject("contact")
+                //mobileNumbers.add(contact.getString("mobile"))
             }
+        }
+        catch (e: JSONException) {
+            e.printStackTrace()
+        }
 
-            // Inside onInitializationFailure
-            // implement the failure functionality
-            // Here we will show toast
-            override fun onInitializationFailure(
-                p0: YouTubePlayer.Provider?,
-                p1: YouTubeInitializationResult?
-            ) {
-                Toast.makeText(this@MainActivity , "Video player Failed" , Toast.LENGTH_SHORT).show()
-            }
-        })
-     */
+        // Final URL will look like: https://m.youtube.com/watch?v=AwyRYse4kss&list=TLGGShmZwWHrpk0xNjA2MjAyMg
+        getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
+
+    }
+
+    private fun createStandalonePlayer() {
+        val intent =
+            YouTubeStandalonePlayer.createPlaylistIntent(this, API_KEY, "RDCLAK5uy_k5n4srrEB1wgvIjPNTXS9G1ufE9WQxhnA")
+            //YouTubeStandalonePlayer.createVideoIntent(this, API_KEY, "gHnuQZFxHt0")
+        startActivity(intent) // https://www.youtube.com/watch?v=CIMmK86vNYo&list=TLGGXcjgW8GO36YxNjA2MjAyMg&
+    }
 
     private fun initializeYoutubePlayer() {
         //val youTubePlayerFragment = supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragment? ?: return
         youtubeFragment = supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragmentX? ?: return
-
         youtubeFragment!!.initialize(
             API_KEY,
             object : YouTubePlayer.OnInitializedListener {
@@ -206,16 +110,15 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
                 ) {
                     if (!wasRestored) {
                         youTubePlayer = player
+
                         //set the player style default
                         youTubePlayer?.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT)
                         //cue the 1st video by default
                         //youTubePlayer.cueVideo(youtubeVideoArrayList.get(0))
-                        youTubePlayer?.loadVideo("dQw4w9WgXcQ")
+                        //youTubePlayer?.loadVideo("dQw4w9WgXcQ")
+                        //youTubePlayer?.loadPlaylist("TLGGShmZwWHrpk0xNjA2MjAyMg")
                     }
-                    youTubePlayer?.play()
-                    //player?.loadVideo("dQw4w9WgXcQ")
-                    //player?.loadVideo("HzeK7g8cD0Y")
-                    //player?.play()
+                    //youTubePlayer?.play()
                 }
 
                 // Inside onInitializationFailure
@@ -231,11 +134,13 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
     }
 
     private fun listPlaylists() {
+        /*
         if (mYtInst == null) {
             Toast.makeText(this@MainActivity , "Unable to contact Youtube service"
                 , Toast.LENGTH_LONG).show()
             return
         }
+
         val executor = Executors.newSingleThreadExecutor()
         val handler = Handler(Looper.getMainLooper())
         executor.execute {
@@ -267,28 +172,30 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
                 * */
             //}
         }
-    }
+        */
+        if (playlistUrl == null) {
+            getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
+        }
 
-
-    /*
-    **TODO
-    fun listPlaylists() {
-        // Print the names and IDs for up to 10 files.
-        val result: FileList = mYtInst.files().list()
-            .setPageSize(10)
-            .setFields("nextPageToken, files(id, name)")
-            .execute()
-        val files: List<File> = result.getFiles()
-        if (files == null || files.isEmpty()) {
-            println("No files found.")
-        } else {
-            println("Files:")
-            for (file in files) {
-                System.out.printf("%s (%s)\n", file.getName(), file.getId())
-            }
+        if (playlistUrl != null) {
+            Log.d("MAIN", "DDDD current url: $playlistUrl")
+            val listTag = getListTag(playlistUrl!!)
+            youTubePlayer?.loadPlaylist(listTag)
+            youTubePlayer?.play()
+            playlistUrl = null
         }
     }
-     */
+
+    private fun getListTag(url: String) : String {
+        val regex = ".*?&list=([^&]*)&?".toRegex()
+        val matchResult = regex.find(url)
+        if (matchResult != null) {
+            val (result) = matchResult.destructured
+            Log.d("MAIN", "DDDD matchResult $result")
+            return result
+        }
+        throw IllegalArgumentException("Unable to match list from $url")
+    }
 
     override fun onYtClientReady(displayName: String?, email: String?, avatar: Uri?) {
         // Build a new authorized API client service.
@@ -326,13 +233,15 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
         return json
     }
 
-    private fun getRedirectUrl(url:String) : String {
-        var finalUrl = "";
+    fun getRedirectUrl(
+        url:String,
+        callback: (String) -> Unit
+    ) {
         val executor = Executors.newSingleThreadExecutor()
         val handler = Handler(Looper.getMainLooper())
         executor.execute {
             var urlTmp: URL? = null
-            var redUrl: String? = null
+            var redUrl: String?
             var connection: HttpURLConnection? = null
             try {
                 urlTmp = URL(url)
@@ -351,14 +260,13 @@ public open class MainActivity : BaseYoutubePlaylistActivity() {
             }
             redUrl = connection!!.url.toString()
             connection.disconnect()
-            finalUrl = redUrl
             Log.d("MAIN","DDDD url is $redUrl")
-            //return redUrl
+            callback(redUrl)
         }
         //handler.post {
         //    Log.d("Redirected URL",""+result)
         //}
-        return finalUrl
+        //return finalUrl
     }
 
 }
