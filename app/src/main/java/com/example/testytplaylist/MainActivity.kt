@@ -98,8 +98,8 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     }
 
     private fun initializeYoutubePlayer() {
-        //val youTubePlayerFragment = supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragment? ?: return
-        youtubeFragment = supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragmentX? ?: return
+        youtubeFragment = ((supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragmentX?)
+            ?: return)
         youtubeFragment!!.initialize(
             API_KEY,
             object : YouTubePlayer.OnInitializedListener {
@@ -110,15 +110,11 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                 ) {
                     if (!wasRestored) {
                         youTubePlayer = player
-
                         //set the player style default
                         youTubePlayer?.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT)
                         //cue the 1st video by default
-                        //youTubePlayer.cueVideo(youtubeVideoArrayList.get(0))
-                        //youTubePlayer?.loadVideo("dQw4w9WgXcQ")
-                        //youTubePlayer?.loadPlaylist("TLGGShmZwWHrpk0xNjA2MjAyMg")
+                        youTubePlayer?.loadVideo("dQw4w9WgXcQ")
                     }
-                    //youTubePlayer?.play()
                 }
 
                 // Inside onInitializationFailure
@@ -128,9 +124,10 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                     p0: YouTubePlayer.Provider?,
                     p1: YouTubeInitializationResult?
                 ) {
-                    Toast.makeText(this@MainActivity , "Video player Failed" , Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity , "Video player Failed" , Toast.LENGTH_LONG).show()
                 }
             })
+
     }
 
     private fun listPlaylists() {
@@ -183,6 +180,8 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             youTubePlayer?.loadPlaylist(listTag)
             youTubePlayer?.play()
             playlistUrl = null
+        } else {
+            Toast.makeText(this@MainActivity , "Failed to get playlist" , Toast.LENGTH_LONG).show()
         }
     }
 
@@ -202,14 +201,6 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         mYtInst = YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential())
             .setApplicationName(APPLICATION_NAME)
             .build()
-        /*
-        ** TODO
-        try {
-            listPlaylists()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-         */
     }
 
     private fun loadJSONFromAsset(): String {
@@ -233,7 +224,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         return json
     }
 
-    fun getRedirectUrl(
+    private fun getRedirectUrl(
         url:String,
         callback: (String) -> Unit
     ) {
@@ -241,7 +232,6 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         val handler = Handler(Looper.getMainLooper())
         executor.execute {
             var urlTmp: URL? = null
-            var redUrl: String?
             var connection: HttpURLConnection? = null
             try {
                 urlTmp = URL(url)
@@ -258,7 +248,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
-            redUrl = connection!!.url.toString()
+            val redUrl: String = connection!!.url.toString()
             connection.disconnect()
             Log.d("MAIN","DDDD url is $redUrl")
             callback(redUrl)
