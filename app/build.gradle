@@ -63,4 +63,8 @@ dependencies {
 
     // For YT
     implementation('com.google.apis:google-api-services-youtube:v3-rev20210915-1.32.1')
+
+    // For coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
 }

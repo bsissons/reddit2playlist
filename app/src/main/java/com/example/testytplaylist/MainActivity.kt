@@ -2,8 +2,6 @@ package com.example.testytplaylist
 
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
@@ -12,14 +10,10 @@ import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
-import com.google.api.services.youtube.model.PlaylistListResponse
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URL
-import java.util.concurrent.Executors
+import kotlinx.coroutines.*
 
 open class MainActivity : BaseYoutubePlaylistActivity() {
     private val APPLICATION_NAME = "YouTubePlaylist Checker"
@@ -34,10 +28,10 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     private val API_KEY =  "AIzaSyCL91bZwoiKhAacW5uMW0RLGLU2ilFzotY"
 
     private var mYtInst: YouTube? = null
-    private var playlistUrl: String? = null
 
     private var youtubeFragment: YouTubePlayerSupportFragmentX? = null
-    private val youtubeVideoArrayList: ArrayList<String>? = null
+    private var youtubeVideoIds = mutableListOf<String>()
+
     //youtube player to play video when new video selected
     private var youTubePlayer: YouTubePlayer? = null
 
@@ -67,7 +61,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
     private fun runDebugButton() {
         try {
-            val obj = JSONObject(loadJSONFromAsset())
+            val obj = JSONObject(loadJSONFromAsset("sample.json"))
             //val obj = JSONObject("")
             val userArray = obj.getJSONArray("items")
             for (i in 0 until userArray.length()) {
@@ -86,8 +80,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         }
 
         // Final URL will look like: https://m.youtube.com/watch?v=AwyRYse4kss&list=TLGGShmZwWHrpk0xNjA2MjAyMg
-        getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
-
+        //getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
     }
 
     private fun createStandalonePlayer() {
@@ -130,7 +123,56 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
     }
 
+    private fun loadPlaylists() {
+        Log.d("MAIN", "DDDD loadPlaylists")
+        val isPlaying : Boolean = youTubePlayer?.isPlaying == true
+        val isNotEmpty = youtubeVideoIds.isNotEmpty()
+        if (isPlaying) {
+            Log.d("MAIN", "DDDD is playing")
+        } else {
+            Log.d("MAIN", "DDDD is not playing")
+        }
+        if (isNotEmpty) {
+            Log.d("MAIN", "DDDD is not empty")
+        } else {
+            Log.d("MAIN", "DDDD is empty")
+        }
+        if (isNotEmpty) {
+            //val listTag = getListTag(url)
+            youTubePlayer?.loadVideos(youtubeVideoIds)
+            youTubePlayer?.play()
+        }
+    }
+
+    private fun getRedditPosts() {
+        Log.d("MAIN", "DDDD getRedditPosts")
+        try {
+            val obj = JSONObject(loadJSONFromAsset("reddit_query.json"))
+            val data = obj.getJSONObject("data")
+            val childArray = data.getJSONArray("children")
+            for (i in 0 until childArray.length()) {
+                val post = childArray.getJSONObject(i)
+                val postData = post.getJSONObject("data")
+                val url = postData.getString("url_overridden_by_dest")
+                val title = postData.getString("title")
+                Log.d("MAIN", "DDDD The url of the video is: $url")
+                val tag = getVideoTag(url)
+                youtubeVideoIds.add(tag)
+            }
+        }
+        catch (e: JSONException) {
+            Log.d("MAIN", "DDDD failed to extract json")
+            e.printStackTrace()
+        }
+    }
+
+    //private fun listPlaylists() = runBlocking<Unit> {
     private fun listPlaylists() {
+        youTubePlayer?.pause()
+        youtubeVideoIds.clear()
+        getRedditPosts()
+        loadPlaylists()
+
         /*
         if (mYtInst == null) {
             Toast.makeText(this@MainActivity , "Unable to contact Youtube service"
@@ -170,19 +212,16 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             //}
         }
         */
-        if (playlistUrl == null) {
-            getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
-        }
+        //if (playlistUrl == null) {
+        //    getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
+        //}
 
-        if (playlistUrl != null) {
-            Log.d("MAIN", "DDDD current url: $playlistUrl")
-            val listTag = getListTag(playlistUrl!!)
-            youTubePlayer?.loadPlaylist(listTag)
-            youTubePlayer?.play()
-            playlistUrl = null
-        } else {
-            Toast.makeText(this@MainActivity , "Failed to get playlist" , Toast.LENGTH_LONG).show()
-        }
+        //val newPlaylistUrls = getRedirectUrl(listOf(PLAYLIST_PATH))
+        //newPlaylistUrls.collect {
+        //        value: String ->
+        //    loadPlaylists(value)
+        //    youtubePlaylistIds.add(value)
+        //}
     }
 
     private fun getListTag(url: String) : String {
@@ -196,6 +235,18 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         throw IllegalArgumentException("Unable to match list from $url")
     }
 
+    private fun getVideoTag(url: String) : String {
+        Log.d("MAIN", "DDDD getVideoTag")
+        val regex = ".*?(shorts|v=|youtu\\.be)/?([^&]*)&?.*".toRegex()
+        val matchResult = regex.find(url)
+        if (matchResult != null) {
+            val (before, result) = matchResult.destructured
+            Log.d("MAIN", "DDDD matchResult $result")
+            return result
+        }
+        throw IllegalArgumentException("Unable to match list from $url")
+    }
+
     override fun onYtClientReady(displayName: String?, email: String?, avatar: Uri?) {
         // Build a new authorized API client service.
         mYtInst = YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredential())
@@ -203,11 +254,11 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             .build()
     }
 
-    private fun loadJSONFromAsset(): String {
+    private fun loadJSONFromAsset(fileName: String): String {
         val json: String?
         try {
             //val inputStream = assets.open("sample.json")
-            val inputStream = resources.assets.open("sample.json")
+            val inputStream = resources.assets.open(fileName)
             //val inputStream = Resources.getResource("sample.json")
             val size = inputStream.available()
             val buffer = ByteArray(size)
@@ -224,13 +275,9 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         return json
     }
 
-    private fun getRedirectUrl(
-        url:String,
-        callback: (String) -> Unit
-    ) {
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-        executor.execute {
+    /*
+    private fun getRedirectUrl(urlList: List<String>) : Flow<String> = flow {
+        for (url in urlList) {
             var urlTmp: URL? = null
             var connection: HttpURLConnection? = null
             try {
@@ -250,13 +297,10 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             }
             val redUrl: String = connection!!.url.toString()
             connection.disconnect()
-            Log.d("MAIN","DDDD url is $redUrl")
-            callback(redUrl)
+            Log.d("MAIN", "DDDD url is $redUrl")
+            emit(redUrl)
         }
-        //handler.post {
-        //    Log.d("Redirected URL",""+result)
-        //}
-        //return finalUrl
     }
+     */
 
 }

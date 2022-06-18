@@ -1,0 +1,232 @@
+{
+  "kind": "youtube#playlistListResponse",
+  "etag": "Hnv6BUBTJaZgnRGg9P5XMUspf8U",
+  "pageInfo": {
+    "totalResults": 7,
+    "resultsPerPage": 25
+  },
+  "items": [
+    {
+      "kind": "youtube#playlist",
+      "etag": "wWziqziFDAXN1zwKo1V-NAKTEcI",
+      "id": "PLB9mou1ZkfI9qABZGcpwci-nbbNCXuT6D",
+      "snippet": {
+        "publishedAt": "2022-06-11T16:39:22Z",
+        "channelId": "UCQPQCOYlhBZoLXIUm7nRsZw",
+        "title": "Sample playlist created via API",
+        "description": "This is a sample playlist description.",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/img/no_thumbnail.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/img/no_thumbnail.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/img/no_thumbnail.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "Otamotz",
+        "defaultLanguage": "en",
+        "localized": {
+          "title": "Sample playlist created via API",
+          "description": "This is a sample playlist description."
+        }
+      },
+      "contentDetails": {
+        "itemCount": 0
+      }
+    },
+    {
+      "kind": "youtube#playlist",
+      "etag": "UK8i_ESgDrl2E97P08_rC-tR1KU",
+      "id": "PLB9mou1ZkfI8y8fZZ5XM_rsITzAPAZlpt",
+      "snippet": {
+        "publishedAt": "2022-04-23T10:03:47Z",
+        "channelId": "UCQPQCOYlhBZoLXIUm7nRsZw",
+        "title": "beastie boys",
+        "description": "bb",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/OiRqNf1BKNQ/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/OiRqNf1BKNQ/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/OiRqNf1BKNQ/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/OiRqNf1BKNQ/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/OiRqNf1BKNQ/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Otamotz",
+        "localized": {
+          "title": "beastie boys",
+          "description": "bb"
+        }
+      },
+      "contentDetails": {
+        "itemCount": 34
+      }
+    },
+    {
+      "kind": "youtube#playlist",
+      "etag": "ih5g4TOmZYKn8M8DvvXc9JfL9eM",
+      "id": "PLB9mou1ZkfI-61Re0R_shaI2cPHxzsAvF",
+      "snippet": {
+        "publishedAt": "2022-04-23T09:55:14Z",
+        "channelId": "UCQPQCOYlhBZoLXIUm7nRsZw",
+        "title": "ff radio",
+        "description": "",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/AxuTd9rwEHQ/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/AxuTd9rwEHQ/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/AxuTd9rwEHQ/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/AxuTd9rwEHQ/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/AxuTd9rwEHQ/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Otamotz",
+        "localized": {
+          "title": "ff radio",
+          "description": ""
+        }
+      },
+      "contentDetails": {
+        "itemCount": 51
+      }
+    },
+    {
+      "kind": "youtube#playlist",
+      "etag": "gWF03PpkiAU1pKZLK44U0tPNDB0",
+      "id": "PLB9mou1ZkfI85C8AY41TPAp7peFQplbX0",
+      "snippet": {
+        "publishedAt": "2019-12-03T17:50:17Z",
+        "channelId": "UCQPQCOYlhBZoLXIUm7nRsZw",
+        "title": "Edm",
+        "description": "",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/abqU2YLFnJ8/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/abqU2YLFnJ8/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/abqU2YLFnJ8/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/abqU2YLFnJ8/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/abqU2YLFnJ8/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Otamotz",
+        "localized": {
+          "title": "Edm",
+          "description": ""
+        }
+      },
+      "contentDetails": {
+        "itemCount": 23
+      }
+    },
+    {
+      "kind": "youtube#playlist",
+      "etag": "aVoxVT1V37s2AKq4ceSHS-mNHEs",
+      "id": "FLQPQCOYlhBZoLXIUm7nRsZw",
+      "snippet": {
+        "publishedAt": "2014-01-20T04:33:38Z",
+        "channelId": "UCQPQCOYlhBZoLXIUm7nRsZw",
+        "title": "Favorites",
+        "description": "",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/lSJ1RnaYLHc/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/lSJ1RnaYLHc/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/lSJ1RnaYLHc/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/lSJ1RnaYLHc/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/lSJ1RnaYLHc/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Otamotz",
+        "defaultLanguage": "en",
+        "localized": {
+          "title": "Favorites",
+          "description": ""
+        }
+      },
+      "contentDetails": {
+        "itemCount": 39
+      }
+    }
+  ]
+}
