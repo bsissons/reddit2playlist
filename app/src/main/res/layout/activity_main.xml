@@ -46,7 +46,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout="@layout/activity_main" />
+
+    <AutoCompleteTextView
+        android:id="@+id/subreddit_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:text="@string/subreddit_name"
+        android:hint="@string/subreddit_suggestion"
+        app:layout_constraintBottom_toTopOf="@+id/list_playlist"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/youtubeFragment" />
 
     <!--
     <com.google.android.youtube.player.YouTubePlayerView

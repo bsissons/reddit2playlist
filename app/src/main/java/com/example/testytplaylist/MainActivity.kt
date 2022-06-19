@@ -4,16 +4,24 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.google.android.youtube.player.*
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
+import kotlinx.coroutines.*
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.IOException
-import kotlinx.coroutines.*
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+//import java.net.MalformedURLException
+import java.net.URL
 
 open class MainActivity : BaseYoutubePlaylistActivity() {
     private val APPLICATION_NAME = "YouTubePlaylist Checker"
@@ -31,9 +39,12 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
     private var youtubeFragment: YouTubePlayerSupportFragmentX? = null
     private var youtubeVideoIds = mutableListOf<String>()
+    private var youtubeVideoMap = hashMapOf<String, VideoInfo>()
 
     //youtube player to play video when new video selected
     private var youTubePlayer: YouTubePlayer? = null
+
+    private var listOfSubreddits = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +68,8 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         debugButton.setOnClickListener {
             runDebugButton()
         }
+
+        //listOfSubreddits = getSubreddits()
     }
 
     private fun runDebugButton() {
@@ -144,13 +157,17 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         }
     }
 
-    private fun getRedditPosts() {
+    private fun getRedditPosts() : Boolean {
         Log.d("MAIN", "DDDD getRedditPosts")
+        var worked : Boolean = false
         try {
-            val obj = JSONObject(loadJSONFromAsset("reddit_query.json"))
+            //val obj = JSONObject(loadJSONFromAsset("reddit_query.json"))
+            val subredditName = findViewById<TextView>(R.id.subreddit_list).text.toString()
+            val obj = JSONObject(getJsonFromUrl("https://www.reddit.com/r/$subredditName.json"))
             val data = obj.getJSONObject("data")
             val childArray = data.getJSONArray("children")
             for (i in 0 until childArray.length()) {
+                worked = true
                 val post = childArray.getJSONObject(i)
                 val postData = post.getJSONObject("data")
                 val url = postData.getString("url_overridden_by_dest")
@@ -158,20 +175,43 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                 Log.d("MAIN", "DDDD The url of the video is: $url")
                 val tag = getVideoTag(url)
                 youtubeVideoIds.add(tag)
+
+                val secureMedia : JSONObject = postData.getJSONObject("secure_media")
+                val oembed : JSONObject = secureMedia.getJSONObject("oembed")
+                val thumbnailUrl = oembed.getString("thumbnail_url")
+                youtubeVideoMap[tag] = VideoInfo(title, thumbnailUrl)
             }
         }
         catch (e: JSONException) {
-            Log.d("MAIN", "DDDD failed to extract json")
+            Log.e("MAIN", "Failed to extract json")
             e.printStackTrace()
         }
+        return worked
     }
+
+    //private fun getSubreddits() : MutableList<String> {
+    //
+    //}
+
+    //private fun isValidSubreddit(name : String) {
+    //    if (subredditList.)
+    //}
 
     //private fun listPlaylists() = runBlocking<Unit> {
     private fun listPlaylists() {
         youTubePlayer?.pause()
         youtubeVideoIds.clear()
-        getRedditPosts()
-        loadPlaylists()
+        youtubeVideoMap.clear()
+        if (getRedditPosts()) {
+            loadPlaylists()
+        } else {
+            Toast.makeText(
+                this@MainActivity,
+                "Invalid subreddit name",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
 
         /*
         if (mYtInst == null) {
@@ -275,31 +315,106 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         return json
     }
 
-    /*
-    private fun getRedirectUrl(urlList: List<String>) : Flow<String> = flow {
-        for (url in urlList) {
-            var urlTmp: URL? = null
-            var connection: HttpURLConnection? = null
-            try {
-                urlTmp = URL(url)
-            } catch (e1: MalformedURLException) {
-                e1.printStackTrace()
-            }
-            try {
-                connection = urlTmp!!.openConnection() as HttpURLConnection
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            try {
-                connection!!.responseCode
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            val redUrl: String = connection!!.url.toString()
-            connection.disconnect()
-            Log.d("MAIN", "DDDD url is $redUrl")
-            emit(redUrl)
+    private suspend fun httpGet(url: String): String {
+        val result: String = withContext(Dispatchers.IO) {
+            var tmpString = ""
+            val inputStream: InputStream
+            // create URL
+            val url:URL =  URL(url)
+
+            // create HttpURLConnection
+            val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
+
+            // make GET request to the given URL
+            conn.connect()
+
+            // receive response as inputStream
+            inputStream = conn.inputStream
+
+            // convert inputstream to string
+            if(inputStream != null)
+                tmpString = convertInputStreamToString(inputStream)
+            tmpString
         }
+        return result
+    }
+
+    private fun convertInputStreamToString(inputStream: InputStream): String {
+        val stringBuffer = StringBuffer()
+        val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+        var line: String?
+        while (bufferedReader.readLine().also { line = it } != null) {
+            stringBuffer.append(line)
+            Log.d("MAIN", "DDDD response: '$line'")
+        }
+        return stringBuffer.toString()
+    }
+
+    private fun getJsonFromUrl(url: String): String {
+        Log.d("MAIN", "getJsonFromUrl - inputUrl=$url")
+        //var jsonObj = JSONObject()
+        var jsonString = runBlocking {
+            httpGet(url)
+        }
+        //Log.d("MAIN", "jsonString: $jsonString")
+        return jsonString
+    }
+
+    /*
+    private suspend fun getJsonFromUrl(url: String) : JSONObject = withContext(Dispatchers.IO) {
+        Log.d("MAIN", "getJsonFromUrl")
+        val stringBuffer = StringBuffer()
+        var urlTmp: URL? = null
+        var connection: HttpURLConnection? = null
+
+        try {
+            urlTmp = URL(url)
+        } catch (e1: MalformedURLException) {
+            e1.printStackTrace()
+        }
+        try {
+            connection = urlTmp!!.openConnection() as HttpURLConnection
+            connection!!.responseCode
+            //val bufferedReader = urlTmp.getInputStream().bufferedReader().use(BufferedReader::readText)
+            val bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
+            var line: String?
+            while (bufferedReader.readLine().also { line = it } != null) {
+                stringBuffer.append(line)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        connection?.disconnect()
+        return@withContext JSONObject(stringBuffer.toString())
+        //emit(redUrl)
+    }
+     */
+
+    /*
+    private fun getRedirectUrl(url : String) : String = doInBackground {
+        var urlTmp: URL? = null
+        var connection: HttpURLConnection? = null
+        try {
+            urlTmp = URL(url)
+        } catch (e1: MalformedURLException) {
+            e1.printStackTrace()
+        }
+        try {
+            connection = urlTmp!!.openConnection() as HttpURLConnection
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        try {
+            connection!!.responseCode
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        val redUrl: String = connection!!.url.toString()
+        connection.disconnect()
+        Log.d("MAIN", "DDDD url is $redUrl")
+        emit(redUrl)
+
     }
      */
 

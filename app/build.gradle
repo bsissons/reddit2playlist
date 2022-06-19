@@ -67,4 +67,7 @@ dependencies {
     // For coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+
+    //Lifecyclescope
+    //implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-rc02"
 }
