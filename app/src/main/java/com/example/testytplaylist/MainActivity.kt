@@ -3,16 +3,19 @@ package com.example.testytplaylist
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
-import com.google.android.youtube.player.*
+import android.widget.*
+import com.google.android.youtube.player.YouTubeInitializationResult
+import com.google.android.youtube.player.YouTubePlayer
+import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
+import com.google.android.youtube.player.YouTubePlayerSupportFragmentX
+import com.google.android.youtube.player.YouTubeStandalonePlayer
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -20,31 +23,30 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
-//import java.net.MalformedURLException
 import java.net.URL
+
 
 open class MainActivity : BaseYoutubePlaylistActivity() {
     private val APPLICATION_NAME = "YouTubePlaylist Checker"
-
-    private val PLAYLIST_PATH = "https://www.youtube.com/watch_videos?video_ids=AwyRYse4kss,QoitiIbdeaM,drlB2RT_XiA"
 
     // Global instance of the HTTP transport.
     private val HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport()
     // * Global instance of the JSON factory.
     private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
-
+    // YT player API key
     private val API_KEY =  "AIzaSyCL91bZwoiKhAacW5uMW0RLGLU2ilFzotY"
+    // List of subreddits
+    private val SUBREDDITS_LIST = "subreddits_sfw.list"
 
+    // Instance for the Youtube login
     private var mYtInst: YouTube? = null
-
+    // Fragment that holds the player
     private var youtubeFragment: YouTubePlayerSupportFragmentX? = null
-    private var youtubeVideoIds = mutableListOf<String>()
-    private var youtubeVideoMap = hashMapOf<String, VideoInfo>()
-
     //youtube player to play video when new video selected
     private var youTubePlayer: YouTubePlayer? = null
-
-    private var listOfSubreddits = mutableListOf<String>()
+    // Holds the playlist information
+    private var youtubeVideoIds = mutableListOf<String>()
+    private var youtubeVideoMap = hashMapOf<String, VideoInfo>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +54,13 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         //createStandalonePlayer()
         initializeYoutubePlayer()
 
+        // Login to Google
         val loginButton: Button = findViewById(R.id.login)
         loginButton.setOnClickListener {
             signIn(true)
         }
+
+        // Generate the playlist
         val playlistButton: Button = findViewById(R.id.list_playlist)
         playlistButton.setOnClickListener {
             try {
@@ -64,12 +69,20 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                 e.printStackTrace()
             }
         }
-        val debugButton: Button = findViewById(R.id.test_button)
-        debugButton.setOnClickListener {
-            runDebugButton()
-        }
 
-        //listOfSubreddits = getSubreddits()
+        // Set up the autocomplete field
+        setAutoComplete()
+    }
+
+    private fun setAutoComplete() {
+        val subredditInput : AutoCompleteTextView = findViewById(R.id.subreddit_input)
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            populateSubreddits()
+        )
+        subredditInput.setAdapter(adapter)
+        subredditInput.threshold = 3
     }
 
     private fun runDebugButton() {
@@ -82,10 +95,6 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                 val snippet = playlistDetail.getJSONObject("snippet")
                 val title = snippet.getString("title")
                 Log.d("MAIN", "The title of the playlist is: $title")
-                //personName.add(userDetail.getString("name"))
-                //emailId.add(userDetail.getString("email"))
-                //val contact = userDetail.getJSONObject("contact")
-                //mobileNumbers.add(contact.getString("mobile"))
             }
         }
         catch (e: JSONException) {
@@ -103,8 +112,21 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         startActivity(intent) // https://www.youtube.com/watch?v=CIMmK86vNYo&list=TLGGXcjgW8GO36YxNjA2MjAyMg&
     }
 
+    private val playlistEventListener: YouTubePlayer.PlaylistEventListener =
+        object : YouTubePlayer.PlaylistEventListener {
+            override fun onPrevious() {
+                Log.d("MAIN", "DDDD previous video")
+            }
+            override fun onNext() {
+                Log.d("MAIN", "DDDD next video")
+            }
+            override fun onPlaylistEnded() {
+                Log.d("MAIN", "DDDD playlist over")
+            }
+        }
+
     private fun initializeYoutubePlayer() {
-        youtubeFragment = ((supportFragmentManager.findFragmentById(R.id.youtubeFragment) as YouTubePlayerSupportFragmentX?)
+        youtubeFragment = ((supportFragmentManager.findFragmentById(R.id.youtube_fragment) as YouTubePlayerSupportFragmentX?)
             ?: return)
         youtubeFragment!!.initialize(
             API_KEY,
@@ -118,7 +140,9 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                         youTubePlayer = player
                         //set the player style default
                         youTubePlayer?.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT)
-                        //cue the 1st video by default
+                        // Set the callback for video change
+                        youTubePlayer?.setPlaylistEventListener(playlistEventListener)
+                        //cue the 1st video by default ;)
                         youTubePlayer?.loadVideo("dQw4w9WgXcQ")
                     }
                 }
@@ -159,27 +183,38 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
     private fun getRedditPosts() : Boolean {
         Log.d("MAIN", "DDDD getRedditPosts")
-        var worked : Boolean = false
+        var worked = false
+
+        // If there is a JSON exception here then something went wrong (maybe a bad subreddit name)
         try {
-            //val obj = JSONObject(loadJSONFromAsset("reddit_query.json"))
-            val subredditName = findViewById<TextView>(R.id.subreddit_list).text.toString()
+            val subredditName = findViewById<TextView>(R.id.subreddit_input).text.toString()
             val obj = JSONObject(getJsonFromUrl("https://www.reddit.com/r/$subredditName.json"))
             val data = obj.getJSONObject("data")
             val childArray = data.getJSONArray("children")
             for (i in 0 until childArray.length()) {
-                worked = true
-                val post = childArray.getJSONObject(i)
-                val postData = post.getJSONObject("data")
-                val url = postData.getString("url_overridden_by_dest")
-                val title = postData.getString("title")
-                Log.d("MAIN", "DDDD The url of the video is: $url")
-                val tag = getVideoTag(url)
-                youtubeVideoIds.add(tag)
-
-                val secureMedia : JSONObject = postData.getJSONObject("secure_media")
-                val oembed : JSONObject = secureMedia.getJSONObject("oembed")
-                val thumbnailUrl = oembed.getString("thumbnail_url")
-                youtubeVideoMap[tag] = VideoInfo(title, thumbnailUrl)
+                // Wrap this stuff in a different try block since we verified that some children
+                // exist so it's a valid subreddit. If this try block fails then it's not a YT video
+                // and we should try to continue
+                try {
+                    val post = childArray.getJSONObject(i)
+                    val postData = post.getJSONObject("data")
+                    val url = postData.getString("url_overridden_by_dest")
+                    val title = postData.getString("title")
+                    Log.d("MAIN", "DDDD The url of the video is: $url")
+                    val secureMedia: JSONObject = postData.getJSONObject("secure_media")
+                    val oembed: JSONObject = secureMedia.getJSONObject("oembed")
+                    val thumbnailUrl = oembed.getString("thumbnail_url")
+                    try {
+                        val tag = getVideoTag(url)
+                        youtubeVideoIds.add(tag)
+                        youtubeVideoMap[tag] = VideoInfo(title, thumbnailUrl)
+                        worked = true
+                    } catch (e: IllegalArgumentException) {
+                        Log.e("MAIN", "This is not a Yt video")
+                    }
+                } catch (e: JSONException) {
+                    Log.e("MAIN", "This is not a Yt video")
+                }
             }
         }
         catch (e: JSONException) {
@@ -189,9 +224,19 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         return worked
     }
 
-    //private fun getSubreddits() : MutableList<String> {
-    //
-    //}
+    private fun populateSubreddits(): MutableList<String> {
+        val inputStream = resources.assets.open(SUBREDDITS_LIST)
+        val size = inputStream.available()
+        val buffer = ByteArray(size)
+        val charset = Charsets.UTF_8
+        inputStream.read(buffer)
+        inputStream.close()
+        val subreddits = String(buffer, charset)
+        //for (i in 0 until listOfSubreddits.size) {
+        //    Log.d("MAIN", listOfSubreddits[i])
+        //}
+        return subreddits.split("\n") as MutableList<String>
+    }
 
     //private fun isValidSubreddit(name : String) {
     //    if (subredditList.)
@@ -266,7 +311,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
     private fun getListTag(url: String) : String {
         val regex = ".*?&list=([^&]*)&?".toRegex()
-        val matchResult = regex.find(url)
+        val matchResult: MatchResult? = regex.find(url)
         if (matchResult != null) {
             val (result) = matchResult.destructured
             Log.d("MAIN", "DDDD matchResult $result")
@@ -315,12 +360,13 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         return json
     }
 
-    private suspend fun httpGet(url: String): String {
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private suspend fun httpGet(inputUrl: String): String {
         val result: String = withContext(Dispatchers.IO) {
             var tmpString = ""
             val inputStream: InputStream
             // create URL
-            val url:URL =  URL(url)
+            val url =  URL(inputUrl)
 
             // create HttpURLConnection
             val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
@@ -353,7 +399,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     private fun getJsonFromUrl(url: String): String {
         Log.d("MAIN", "getJsonFromUrl - inputUrl=$url")
         //var jsonObj = JSONObject()
-        var jsonString = runBlocking {
+        val jsonString = runBlocking {
             httpGet(url)
         }
         //Log.d("MAIN", "jsonString: $jsonString")

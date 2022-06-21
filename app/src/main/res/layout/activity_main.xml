@@ -11,6 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/login_button"
+        app:layout_constraintBottom_toTopOf="@+id/youtube_fragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.817"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,50 +26,56 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/youtubeFragment"
+        app:layout_constraintTop_toBottomOf="@+id/subreddit_input"
         app:layout_constraintVertical_bias="0.674" />
 
-    <Button
-        android:id="@+id/test_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/test_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/list_playlist" />
-
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/youtubeFragment"
+        android:id="@+id/youtube_fragment"
         android:name="com.google.android.youtube.player.YouTubePlayerSupportFragmentX"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout="@layout/activity_main" />
-
-    <AutoCompleteTextView
-        android:id="@+id/subreddit_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:text="@string/subreddit_name"
-        android:hint="@string/subreddit_suggestion"
         app:layout_constraintBottom_toTopOf="@+id/list_playlist"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/youtubeFragment" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!--
-    <com.google.android.youtube.player.YouTubePlayerView
-        android:id="@+id/ytPlayer"
-        android:layout_width="match_parent"
+    <AutoCompleteTextView
+        android:id="@+id/subreddit_input"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="84dp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp">
-    </com.google.android.youtube.player.YouTubePlayerView>
-    -->
+        android:hint="@string/subreddit_suggestion"
+        android:minHeight="48dp"
+        android:text="@string/subreddit_name"
+        app:layout_constraintBottom_toTopOf="@+id/list_playlist"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/next_thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/ic_media_next"
+        tools:layout_editor_absoluteY="460dp" />
+
+    <FrameLayout
+        android:layout_width="391dp"
+        android:layout_height="357dp"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="493dp">
+
+        <ImageView
+            android:id="@+id/prev_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/ic_media_previous" />
+
+        <ImageView
+            android:id="@+id/current_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/ic_media_play" />
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
