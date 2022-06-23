@@ -4,9 +4,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
+import com.bumptech.glide.Glide
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
-import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayerSupportFragmentX
 import com.google.android.youtube.player.YouTubeStandalonePlayer
 import com.google.api.client.extensions.android.http.AndroidHttp
@@ -47,6 +47,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     // Holds the playlist information
     private var youtubeVideoIds = mutableListOf<String>()
     private var youtubeVideoMap = hashMapOf<String, VideoInfo>()
+    private var currentVideoIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +62,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         }
 
         // Generate the playlist
-        val playlistButton: Button = findViewById(R.id.list_playlist)
+        val playlistButton: Button = findViewById(R.id.gen_playlist)
         playlistButton.setOnClickListener {
             try {
                 listPlaylists()
@@ -112,16 +113,55 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         startActivity(intent) // https://www.youtube.com/watch?v=CIMmK86vNYo&list=TLGGXcjgW8GO36YxNjA2MjAyMg&
     }
 
+    private fun videoChangeCallback() {
+        Log.d("MAIN", "videoChangeCallback")
+        if (currentVideoIndex > 0) {
+            val prevVideoId = youtubeVideoIds[currentVideoIndex-1]
+            Glide.with(this)
+                .load(youtubeVideoMap[prevVideoId]?.getThumbnail())
+                .into(findViewById(R.id.prev_thumbnail))
+        }
+
+        val currentVideoId = youtubeVideoIds[currentVideoIndex]
+        Glide.with(this)
+            .load(youtubeVideoMap[currentVideoId]?.getThumbnail())
+            .into(findViewById(R.id.current_thumbnail))
+
+        if (currentVideoIndex+1 < youtubeVideoIds.size) {
+            val nextVideoId = youtubeVideoIds[currentVideoIndex+1]
+            Glide.with(this)
+                .load(youtubeVideoMap[nextVideoId]?.getThumbnail())
+                .into(findViewById(R.id.next_thumbnail))
+        } else {
+            val imageView = findViewById<ImageView>(R.id.next_thumbnail)
+            // TODO how to get the R.drawable.ic_media_next? Just save it to assets?
+            //imageView.setImageDrawable(@android:drawable/ic_media_next)
+            //imageView.setImageResource(17301538)
+        }
+
+        //TODO youTubePlayer?.loadVideos(youtubeVideoIds, currentVideoIndex, 0)
+    }
+
     private val playlistEventListener: YouTubePlayer.PlaylistEventListener =
         object : YouTubePlayer.PlaylistEventListener {
             override fun onPrevious() {
                 Log.d("MAIN", "DDDD previous video")
+                if (currentVideoIndex > 0) {
+                    currentVideoIndex -= 1
+                    videoChangeCallback()
+                }
             }
             override fun onNext() {
                 Log.d("MAIN", "DDDD next video")
+                if (currentVideoIndex+1 < youtubeVideoIds.size) {
+                    currentVideoIndex += 1
+                    videoChangeCallback()
+                }
             }
             override fun onPlaylistEnded() {
+                // TODO restart or stop?
                 Log.d("MAIN", "DDDD playlist over")
+                //videoChangeCallback()
             }
         }
 
@@ -175,9 +215,11 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             Log.d("MAIN", "DDDD is empty")
         }
         if (isNotEmpty) {
+            currentVideoIndex = 0
             //val listTag = getListTag(url)
             youTubePlayer?.loadVideos(youtubeVideoIds)
             youTubePlayer?.play()
+            videoChangeCallback()
         }
     }
 
@@ -232,24 +274,21 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         inputStream.read(buffer)
         inputStream.close()
         val subreddits = String(buffer, charset)
-        //for (i in 0 until listOfSubreddits.size) {
-        //    Log.d("MAIN", listOfSubreddits[i])
-        //}
+        Log.d("MAIN", "DDDD about to return subreddit list")
         return subreddits.split("\n") as MutableList<String>
     }
 
-    //private fun isValidSubreddit(name : String) {
-    //    if (subredditList.)
-    //}
-
-    //private fun listPlaylists() = runBlocking<Unit> {
     private fun listPlaylists() {
         youTubePlayer?.pause()
+        val backupYoutubeVideoIds = youtubeVideoIds
+        val backupYoutubeVideoMap = youtubeVideoMap
         youtubeVideoIds.clear()
         youtubeVideoMap.clear()
         if (getRedditPosts()) {
             loadPlaylists()
         } else {
+            youtubeVideoIds = backupYoutubeVideoIds
+            youtubeVideoMap = backupYoutubeVideoMap
             Toast.makeText(
                 this@MainActivity,
                 "Invalid subreddit name",

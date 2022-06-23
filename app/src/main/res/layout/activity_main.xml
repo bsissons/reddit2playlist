@@ -18,23 +18,22 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/list_playlist"
+        android:id="@+id/gen_playlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/list_playlist"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/subreddit_input"
-        app:layout_constraintVertical_bias="0.674" />
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/youtube_fragment"
         android:name="com.google.android.youtube.player.YouTubePlayerSupportFragmentX"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/list_playlist"
+        app:layout_constraintBottom_toTopOf="@+id/gen_playlist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,35 +46,43 @@
         android:hint="@string/subreddit_suggestion"
         android:minHeight="48dp"
         android:text="@string/subreddit_name"
-        app:layout_constraintBottom_toTopOf="@+id/list_playlist"
+        app:layout_constraintBottom_toTopOf="@+id/gen_playlist"
+        app:layout_constraintTop_toBottomOf="@+id/current_thumbnail"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ImageView
+        android:id="@+id/prev_thumbnail"
+        android:layout_width="125dp"
+        android:layout_height="100dp"
+        app:srcCompat="@android:drawable/ic_media_previous"
+        app:layout_constraintTop_toBottomOf="@+id/youtube_fragment"
+        app:layout_constraintBottom_toTopOf="@+id/subreddit_input"
+        app:layout_constraintEnd_toStartOf="@+id/current_thumbnail"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/prev_thumbnail" />
+
+    <ImageView
+        android:id="@+id/current_thumbnail"
+        android:layout_width="125dp"
+        android:layout_height="100dp"
+        app:srcCompat="@android:drawable/ic_media_play"
+        app:layout_constraintTop_toBottomOf="@+id/youtube_fragment"
+        app:layout_constraintBottom_toTopOf="@+id/subreddit_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/current_thumbnail" />
 
     <ImageView
         android:id="@+id/next_thumbnail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="125dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="24dp"
         app:srcCompat="@android:drawable/ic_media_next"
-        tools:layout_editor_absoluteY="460dp" />
-
-    <FrameLayout
-        android:layout_width="391dp"
-        android:layout_height="357dp"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="493dp">
-
-        <ImageView
-            android:id="@+id/prev_thumbnail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_previous" />
-
-        <ImageView
-            android:id="@+id/current_thumbnail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_play" />
-    </FrameLayout>
+        app:layout_constraintTop_toBottomOf="@+id/youtube_fragment"
+        app:layout_constraintBottom_toTopOf="@+id/subreddit_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/current_thumbnail"
+        android:contentDescription="@string/next_thumbnail"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

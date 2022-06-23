@@ -5,4 +5,7 @@
     <string name="test_button">DEBUG</string>
     <string name="subreddit_name">YoutubeHaiku</string>
     <string name="subreddit_suggestion">Choose a subreddit</string>
+    <string name="prev_thumbnail">The previous video thumbnail</string>
+    <string name="current_thumbnail">The current video thumbnail</string>
+    <string name="next_thumbnail">The next video thumbnail</string>
 </resources>
