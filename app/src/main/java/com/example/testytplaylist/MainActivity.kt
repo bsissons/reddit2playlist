@@ -119,27 +119,33 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             val prevVideoId = youtubeVideoIds[currentVideoIndex-1]
             Glide.with(this)
                 .load(youtubeVideoMap[prevVideoId]?.getThumbnail())
+                .error(R.drawable.ic_media_previous)
                 .into(findViewById(R.id.prev_thumbnail))
+        } else {
+            val imageView = findViewById<ImageView>(R.id.prev_thumbnail)
+            imageView.setImageResource(R.drawable.ic_media_previous)
         }
 
         val currentVideoId = youtubeVideoIds[currentVideoIndex]
         Glide.with(this)
             .load(youtubeVideoMap[currentVideoId]?.getThumbnail())
+            .error(R.drawable.ic_media_play)
             .into(findViewById(R.id.current_thumbnail))
 
         if (currentVideoIndex+1 < youtubeVideoIds.size) {
             val nextVideoId = youtubeVideoIds[currentVideoIndex+1]
             Glide.with(this)
                 .load(youtubeVideoMap[nextVideoId]?.getThumbnail())
+                .error(R.drawable.ic_media_next)
                 .into(findViewById(R.id.next_thumbnail))
         } else {
             val imageView = findViewById<ImageView>(R.id.next_thumbnail)
-            // TODO how to get the R.drawable.ic_media_next? Just save it to assets?
-            //imageView.setImageDrawable(@android:drawable/ic_media_next)
-            //imageView.setImageResource(17301538)
+            imageView.setImageResource(R.drawable.ic_media_next)
         }
 
-        //TODO youTubePlayer?.loadVideos(youtubeVideoIds, currentVideoIndex, 0)
+        if (currentVideoIndex == 0) {
+            youTubePlayer?.loadVideos(youtubeVideoIds, currentVideoIndex, 0)
+        }
     }
 
     private val playlistEventListener: YouTubePlayer.PlaylistEventListener =
