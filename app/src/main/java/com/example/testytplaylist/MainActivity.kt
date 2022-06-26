@@ -71,6 +71,21 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             }
         }
 
+        // Callbacks for pressing the thumbnail images
+        findViewById<ImageView>(R.id.prev_thumbnail).setOnClickListener {
+            if (youTubePlayer?.hasPrevious() == true) {
+                youTubePlayer?.previous()
+            }
+        }
+        findViewById<ImageView>(R.id.current_thumbnail).setOnClickListener {
+            youTubePlayer?.loadVideos(youtubeVideoIds, currentVideoIndex, 0)
+        }
+        findViewById<ImageView>(R.id.next_thumbnail).setOnClickListener {
+            if (youTubePlayer?.hasNext() == true) {
+                youTubePlayer?.next()
+            }
+        }
+
         // Set up the autocomplete field
         setAutoComplete()
     }
@@ -148,21 +163,29 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         }
     }
 
+    private fun prevVideo() {
+        if (currentVideoIndex > 0) {
+            currentVideoIndex -= 1
+            videoChangeCallback()
+        }
+    }
+
+    private fun nextVideo() {
+        if (currentVideoIndex+1 < youtubeVideoIds.size) {
+            currentVideoIndex += 1
+            videoChangeCallback()
+        }
+    }
+
     private val playlistEventListener: YouTubePlayer.PlaylistEventListener =
         object : YouTubePlayer.PlaylistEventListener {
             override fun onPrevious() {
                 Log.d("MAIN", "DDDD previous video")
-                if (currentVideoIndex > 0) {
-                    currentVideoIndex -= 1
-                    videoChangeCallback()
-                }
+                prevVideo()
             }
             override fun onNext() {
                 Log.d("MAIN", "DDDD next video")
-                if (currentVideoIndex+1 < youtubeVideoIds.size) {
-                    currentVideoIndex += 1
-                    videoChangeCallback()
-                }
+                nextVideo()
             }
             override fun onPlaylistEnded() {
                 // TODO restart or stop?
@@ -251,9 +274,11 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                     Log.d("MAIN", "DDDD The url of the video is: $url")
                     val secureMedia: JSONObject = postData.getJSONObject("secure_media")
                     val oembed: JSONObject = secureMedia.getJSONObject("oembed")
-                    val thumbnailUrl = oembed.getString("thumbnail_url")
                     try {
                         val tag = getVideoTag(url)
+                        val thumbnailUrl = oembed.getString("thumbnail_url")
+                        //val thumbnailUrl = "https://img.youtube.com/vi/$tag/1.jpg"
+                        Log.d("MAIN", "DDDD thumbnailUrl '$thumbnailUrl'")
                         youtubeVideoIds.add(tag)
                         youtubeVideoMap[tag] = VideoInfo(title, thumbnailUrl)
                         worked = true

@@ -29,7 +29,7 @@ abstract class BaseYoutubePlaylistActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        signIn(false)
+        //signIn(false)
     }
 
     // Handles resolution callbacks.
