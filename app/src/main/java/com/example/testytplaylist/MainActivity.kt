@@ -56,14 +56,18 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         initializeYoutubePlayer()
 
         // Login to Google
-        val loginButton: Button = findViewById(R.id.login)
-        loginButton.setOnClickListener {
+        findViewById<Button>(R.id.login).setOnClickListener {
             signIn(true)
         }
 
+        // Open in App
+        findViewById<Button>(R.id.watch_in_app).setOnClickListener {
+            // TODO open app
+            Toast.makeText(this@MainActivity , "Coming soon!" , Toast.LENGTH_SHORT).show()
+        }
+
         // Generate the playlist
-        val playlistButton: Button = findViewById(R.id.gen_playlist)
-        playlistButton.setOnClickListener {
+        findViewById<Button>(R.id.gen_playlist).setOnClickListener {
             try {
                 listPlaylists()
             } catch (e: IllegalArgumentException) {

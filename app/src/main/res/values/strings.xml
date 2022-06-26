@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Test YT Playlist</string>
     <string name="login_button">Login</string>
+    <string name="watch_in_app_button">Open in App</string>
     <string name="list_playlist">Generate</string>
     <string name="test_button">DEBUG</string>
     <string name="subreddit_name">YoutubeHaiku</string>
