@@ -73,5 +73,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     //Lifecyclescope
-    //implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-rc02"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-rc02"
+    //implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
 }

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
@@ -17,6 +18,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -26,6 +28,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URL
 
 
@@ -40,6 +43,8 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     private val API_KEY =  "AIzaSyCL91bZwoiKhAacW5uMW0RLGLU2ilFzotY"
     // List of subreddits
     private val SUBREDDITS_LIST = "subreddits_sfw.list"
+    // Maximum number of videos in external playlist
+    private val MAX_PLAYLIST_SIZE = 50
 
     // Instance for the Youtube login
     private var mYtInst: YouTube? = null
@@ -99,13 +104,32 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     }
 
     private fun openYoutubeAppForResult() {
-        //val intent = Intent(this, SomeActivity::class.java)
-        val ytIntent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLZ4DbyIWUwCq4V8bIEa8jm2ozHZVuREJP")
-        )
-        //Uri.parse("https://www.youtube.com/watch?v=5X7WWVTrBvM")
-        youtubeResultLauncher.launch(ytIntent)
+        if (youtubeVideoIds.isEmpty()) {
+            Toast.makeText(this@MainActivity,
+                "Generate a playlist first!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val commaSeparatedIds = youtubeVideoIds.take(MAX_PLAYLIST_SIZE).joinToString (separator = ",")
+        Log.d("MAIN", "DDDD the comma separated ids is '$commaSeparatedIds'")
+        lifecycleScope.launch {
+            val inputUrl = getRedirectUrl("https://www.youtube.com/watch_videos?video_ids=$commaSeparatedIds")
+            // TODO is it okay to launch the intent inside the lifecyclescope?
+            val ytIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(inputUrl)
+            )
+            Log.d("MAIN", "DDDD the inputUrl returned is $inputUrl")
+            //Uri.parse("https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLZ4DbyIWUwCq4V8bIEa8jm2ozHZVuREJP")
+            //Uri.parse("https://www.youtube.com/watch?v=5X7WWVTrBvM")
+            youtubeResultLauncher.launch(ytIntent)
+        }
+        //Toast.makeText(this@MainActivity,
+        //    "Failed to generate playlist",
+        //    Toast.LENGTH_LONG
+        //).show()
     }
 
     private var youtubeResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -116,6 +140,10 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             Log.d("MAIN", "DDDD it opened the app ")
         } else {
             Log.d("MAIN", "DDDD it didn't open the app")
+            Toast.makeText(this@MainActivity,
+                "Failed to open YT app",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -154,11 +182,11 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         }
 
         // Final URL will look like: https://m.youtube.com/watch?v=AwyRYse4kss&list=TLGGShmZwWHrpk0xNjA2MjAyMg
-        //getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
     }
 
     private fun videoChangeCallback() {
-        Log.d("MAIN", "videoChangeCallback")
+        Log.d("MAIN", "videoChangeCallback current index is $currentVideoIndex")
+
         if (currentVideoIndex > 0) {
             val prevVideoId = youtubeVideoIds[currentVideoIndex-1]
             Glide.with(this)
@@ -356,57 +384,6 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                 Toast.LENGTH_SHORT
             ).show()
         }
-
-
-        /*
-        if (mYtInst == null) {
-            Toast.makeText(this@MainActivity , "Unable to contact Youtube service"
-                , Toast.LENGTH_LONG).show()
-            return
-        }
-
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
-        executor.execute {
-            /*
-            * Your task will be executed here
-            * you can execute anything here that
-            * you cannot execute in UI thread
-            * for example a network operation
-            * This is a background thread and you cannot
-            * access view elements here
-            *
-            * its like doInBackground()
-            * */
-
-            // Define and execute the API request
-            val request: YouTube.Playlists.List = mYtInst!!.playlists()
-                .list(mutableListOf("snippet,contentDetails"))
-            val response: PlaylistListResponse = request.setMaxResults(25L)
-                .setMine(true)
-                .execute()
-            println("DDDD")
-            println(response)
-            //handler.post {
-                /*
-                * You can perform any operation that
-                * requires UI Thread here.
-                *
-                * its like onPostExecute()
-                * */
-            //}
-        }
-        */
-        //if (playlistUrl == null) {
-        //    getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
-        //}
-
-        //val newPlaylistUrls = getRedirectUrl(listOf(PLAYLIST_PATH))
-        //newPlaylistUrls.collect {
-        //        value: String ->
-        //    loadPlaylists(value)
-        //    youtubePlaylistIds.add(value)
-        //}
     }
 
     private fun getListTag(url: String) : String {
@@ -422,7 +399,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
     private fun getVideoTag(url: String) : String {
         Log.d("MAIN", "DDDD getVideoTag")
-        val regex = ".*?(shorts|v=|youtu\\.be)/?([^&]*)&?.*".toRegex()
+        val regex = ".*?(shorts|v=|youtu\\.be)/?([^&?]*)[&?]?.*".toRegex()
         val matchResult = regex.find(url)
         if (matchResult != null) {
             val (before, result) = matchResult.destructured
@@ -537,31 +514,31 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     }
      */
 
-    /*
-    private fun getRedirectUrl(url : String) : String = doInBackground {
-        var urlTmp: URL? = null
-        var connection: HttpURLConnection? = null
-        try {
-            urlTmp = URL(url)
-        } catch (e1: MalformedURLException) {
-            e1.printStackTrace()
+    private suspend fun getRedirectUrl(url : String) : String {
+        var redUrl = ""
+        withContext(Dispatchers.IO) {
+            var urlTmp: URL? = null
+            var connection: HttpURLConnection? = null
+            try {
+                urlTmp = URL(url)
+            } catch (e1: MalformedURLException) {
+                e1.printStackTrace()
+            }
+            try {
+                connection = urlTmp!!.openConnection() as HttpURLConnection
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            try {
+                connection!!.responseCode
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            redUrl = connection!!.url.toString()
+            connection.disconnect()
+            Log.d("MAIN", "DDDD url is $redUrl")
         }
-        try {
-            connection = urlTmp!!.openConnection() as HttpURLConnection
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        try {
-            connection!!.responseCode
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        val redUrl: String = connection!!.url.toString()
-        connection.disconnect()
-        Log.d("MAIN", "DDDD url is $redUrl")
-        emit(redUrl)
-
+        return redUrl
     }
-     */
 
 }
