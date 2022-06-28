@@ -1,9 +1,12 @@
 package com.example.testytplaylist
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
@@ -63,7 +66,8 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         // Open in App
         findViewById<Button>(R.id.watch_in_app).setOnClickListener {
             // TODO open app
-            Toast.makeText(this@MainActivity , "Coming soon!" , Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this@MainActivity , "Coming soon!" , Toast.LENGTH_SHORT).show()
+            openYoutubeAppForResult()
         }
 
         // Generate the playlist
@@ -92,6 +96,34 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
         // Set up the autocomplete field
         setAutoComplete()
+    }
+
+    private fun openYoutubeAppForResult() {
+        //val intent = Intent(this, SomeActivity::class.java)
+        val ytIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLZ4DbyIWUwCq4V8bIEa8jm2ozHZVuREJP")
+        )
+        //Uri.parse("https://www.youtube.com/watch?v=5X7WWVTrBvM")
+        youtubeResultLauncher.launch(ytIntent)
+    }
+
+    private var youtubeResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // There are no request codes
+            val data: Intent? = result.data
+            //doSomeOperations()
+            Log.d("MAIN", "DDDD it opened the app ")
+        } else {
+            Log.d("MAIN", "DDDD it didn't open the app")
+        }
+    }
+
+    private fun createStandalonePlayer() {
+        val intent =
+            YouTubeStandalonePlayer.createPlaylistIntent(this, API_KEY, "RDCLAK5uy_k5n4srrEB1wgvIjPNTXS9G1ufE9WQxhnA")
+        //YouTubeStandalonePlayer.createVideoIntent(this, API_KEY, "gHnuQZFxHt0")
+        startActivity(intent) // https://www.youtube.com/watch?v=CIMmK86vNYo&list=TLGGXcjgW8GO36YxNjA2MjAyMg&
     }
 
     private fun setAutoComplete() {
@@ -125,13 +157,6 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         //getRedirectUrl(PLAYLIST_PATH) { result: String -> playlistUrl = result }
     }
 
-    private fun createStandalonePlayer() {
-        val intent =
-            YouTubeStandalonePlayer.createPlaylistIntent(this, API_KEY, "RDCLAK5uy_k5n4srrEB1wgvIjPNTXS9G1ufE9WQxhnA")
-            //YouTubeStandalonePlayer.createVideoIntent(this, API_KEY, "gHnuQZFxHt0")
-        startActivity(intent) // https://www.youtube.com/watch?v=CIMmK86vNYo&list=TLGGXcjgW8GO36YxNjA2MjAyMg&
-    }
-
     private fun videoChangeCallback() {
         Log.d("MAIN", "videoChangeCallback")
         if (currentVideoIndex > 0) {
@@ -162,6 +187,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             imageView.setImageResource(R.drawable.ic_media_next)
         }
 
+        // Need to force the first video like this, for some reason it gets stuck otherwise
         if (currentVideoIndex == 0) {
             youTubePlayer?.loadVideos(youtubeVideoIds, currentVideoIndex, 0)
         }
