@@ -317,7 +317,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         // If there is a JSON exception here then something went wrong (maybe a bad subreddit name)
         try {
             val subredditName = findViewById<TextView>(R.id.subreddit_input).text.toString()
-            val obj = JSONObject(getJsonFromUrl("https://www.reddit.com/r/$subredditName.json"))
+            val obj = getJsonFromUrl("https://www.reddit.com/r/$subredditName.json")
             val data = obj.getJSONObject("data")
             val childArray = data.getJSONArray("children")
             for (i in 0 until childArray.length()) {
@@ -473,49 +473,18 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         return stringBuffer.toString()
     }
 
-    private fun getJsonFromUrl(url: String): String {
+    private fun getJsonFromUrl(url: String): JSONObject {
         Log.d("MAIN", "getJsonFromUrl - inputUrl=$url")
-        //var jsonObj = JSONObject()
         val jsonString = runBlocking {
             httpGet(url)
         }
         //Log.d("MAIN", "jsonString: $jsonString")
-        return jsonString
+        return JSONObject(jsonString)
     }
 
-    /*
-    private suspend fun getJsonFromUrl(url: String) : JSONObject = withContext(Dispatchers.IO) {
-        Log.d("MAIN", "getJsonFromUrl")
-        val stringBuffer = StringBuffer()
-        var urlTmp: URL? = null
-        var connection: HttpURLConnection? = null
-
-        try {
-            urlTmp = URL(url)
-        } catch (e1: MalformedURLException) {
-            e1.printStackTrace()
-        }
-        try {
-            connection = urlTmp!!.openConnection() as HttpURLConnection
-            connection!!.responseCode
-            //val bufferedReader = urlTmp.getInputStream().bufferedReader().use(BufferedReader::readText)
-            val bufferedReader = BufferedReader(InputStreamReader(connection.getInputStream()))
-            var line: String?
-            while (bufferedReader.readLine().also { line = it } != null) {
-                stringBuffer.append(line)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        connection?.disconnect()
-        return@withContext JSONObject(stringBuffer.toString())
-        //emit(redUrl)
-    }
-     */
-
+    @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun getRedirectUrl(url : String) : String {
-        var redUrl = ""
+        var redUrl: String
         withContext(Dispatchers.IO) {
             var urlTmp: URL? = null
             var connection: HttpURLConnection? = null
