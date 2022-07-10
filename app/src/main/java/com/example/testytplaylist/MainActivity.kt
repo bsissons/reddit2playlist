@@ -5,8 +5,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.youtube.player.YouTubeInitializationResult
@@ -63,6 +66,9 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         //createStandalonePlayer()
         initializeYoutubePlayer()
 
+        // Set up the hamburger settings button
+        setUpHamburger()
+
         // Login to Google
         findViewById<Button>(R.id.login).setOnClickListener {
             signIn(true)
@@ -101,6 +107,94 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
         // Set up the autocomplete field
         setAutoComplete()
+    }
+
+    /*
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        mDrawerToggle.syncState()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        mDrawerToggle.onConfigurationChanged(newConfig)
+    }
+    */
+
+    /*
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean? {
+        return if (toggle.onOptionsItemSelected(item)) {
+            true
+        } else item?.let { super.onOptionsItemSelected(it) }
+    }
+     */
+
+    private fun setUpHamburger() {
+
+        val drawerLayout = findViewById<View>(R.id.drawer_layout) as DrawerLayout
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setHomeButtonEnabled(true)
+        //supportActionBar!!.setShowHideAnimationEnabled(true)
+        //val toggle = object : ActionBarDrawerToggle(
+        //    this,
+        //    drawerLayout,
+        //    R.string.navigation_drawer_open,
+        //    R.string.navigation_drawer_close
+        //) {}
+        //drawerLayout.setDrawerListener(toggle)
+        //drawerLayout.addDrawerListener()
+        //toggle.syncState()
+        val mDrawerToggle = object : ActionBarDrawerToggle(
+            this,
+            drawerLayout,
+            //R.drawable.toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        ) {
+            override fun onDrawerClosed(view: View) {
+                invalidateOptionsMenu()
+                //setActionBarMode(ActionBar.NAVIGATION_MODE_TABS)
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+                invalidateOptionsMenu()
+                //setActionBarMode(ActionBar.NAVIGATION_MODE_STANDARD)
+            }
+        }
+        drawerLayout.setDrawerListener(mDrawerToggle)
+
+        /*
+        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        val drawerLayout = findViewById<View>(R.id.drawer_layout) as DrawerLayout
+        val mDrawerToggle: ActionBarDrawerToggle
+
+        setSupportActionBar(toolbar)
+        val actionBar: ActionBar? = supportActionBar
+
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            mDrawerToggle = object : ActionBarDrawerToggle(
+                this,
+                drawerLayout,
+                toolbar,
+                R.string.hello_world,
+                R.string.hello_world
+            ) {
+                override fun onDrawerClosed(view: View?) {
+                    supportInvalidateOptionsMenu()
+                    //drawerOpened = false;
+                }
+
+                override fun onDrawerOpened(drawerView: View?) {
+                    supportInvalidateOptionsMenu()
+                    //drawerOpened = true;
+                }
+            }
+            mDrawerToggle.setDrawerIndicatorEnabled(true)
+            drawerLayout.setDrawerListener(mDrawerToggle)
+            mDrawerToggle.syncState()
+        }
+         */
     }
 
     private fun openYoutubeAppForResult() {

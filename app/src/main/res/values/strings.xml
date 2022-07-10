@@ -9,4 +9,6 @@
     <string name="prev_thumbnail">The previous video thumbnail</string>
     <string name="current_thumbnail">The current video thumbnail</string>
     <string name="next_thumbnail">The next video thumbnail</string>
+    <string name="navigation_drawer_open">open</string>
+    <string name="navigation_drawer_close">close</string>
 </resources>
