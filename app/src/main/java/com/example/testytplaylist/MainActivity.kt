@@ -161,7 +161,8 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                 //setActionBarMode(ActionBar.NAVIGATION_MODE_STANDARD)
             }
         }
-        drawerLayout.setDrawerListener(mDrawerToggle)
+        //drawerLayout.setDrawerListener(mDrawerToggle)
+        drawerLayout.addDrawerListener(mDrawerToggle)
 
         /*
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
