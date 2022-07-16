@@ -5,8 +5,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.youtube.player.YouTubeInitializationResult
@@ -101,6 +103,38 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
         // Set up the autocomplete field
         setAutoComplete()
+
+        // Settings window
+        findViewById<ImageView>(R.id.settings).setOnClickListener {
+            //setContentView(R.layout.settings_layout)
+            Toast.makeText(this@MainActivity,
+                "Settings button",
+                Toast.LENGTH_SHORT
+            ).show()
+            val view = findViewById<ConstraintLayout>(R.id.settings_view)
+            view.visibility = View.VISIBLE
+        }
+        findViewById<ImageView>(R.id.back_to_app).setOnClickListener {
+            //setContentView(R.layout.activity_main)
+            val view = findViewById<ConstraintLayout>(R.id.settings_view)
+            view.visibility = View.GONE
+        }
+        setupSettingsSpinner()
+    }
+
+    private fun setupSettingsSpinner() {
+        val spinner: Spinner = findViewById(R.id.num_videos_spinner)
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.number_of_videos,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            spinner.adapter = adapter
+        }
     }
 
     private fun openYoutubeAppForResult() {
@@ -317,7 +351,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         // If there is a JSON exception here then something went wrong (maybe a bad subreddit name)
         try {
             val subredditName = findViewById<TextView>(R.id.subreddit_input).text.toString()
-            val obj = getJsonFromUrl("https://www.reddit.com/r/$subredditName.json")
+            val obj = getJsonFromUrl("https://www.reddit.com/r/$subredditName.json?limit=50")
             val data = obj.getJSONObject("data")
             val childArray = data.getJSONArray("children")
             for (i in 0 until childArray.length()) {

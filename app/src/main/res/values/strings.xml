@@ -9,4 +9,16 @@
     <string name="prev_thumbnail">The previous video thumbnail</string>
     <string name="current_thumbnail">The current video thumbnail</string>
     <string name="next_thumbnail">The next video thumbnail</string>
+    <string name="videos_to_load">Enter the number of videos to load</string>
+    <string name="back_to_main">Go back to main app</string>
+    <string name="settings_hint">Button to open settings menu</string>
+    <string-array name="number_of_videos">
+        <item>25</item>
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>125</item>
+        <item>150</item>
+        <item>200</item>
+    </string-array>
 </resources>
