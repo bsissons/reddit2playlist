@@ -6,6 +6,129 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <!--Base CardView-->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/base_cardview"
+        style="@style/Base.CardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:backgroundTint="@color/background"
+        app:layout_constraintBottom_toBottomOf="@id/watch_in_app"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.473"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/watch_in_app"
+        app:layout_constraintVertical_bias="0.04">
+
+        <!--This is a ConstraintLayout for the entire CardView
+                   including the expandable portion-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/base_cardview"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.1"
+            tools:layout_editor_absoluteX="-55dp">
+
+            <!--This is a ConstraintLayout for the fixed portion
+                of the CardView. The elements
+                that lie within the fixed portion of the CardView
+                can be constrained to this layout.-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fixed_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0">
+
+                <ImageView
+                    android:id="@+id/settings"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:contentDescription="@string/settings_hint"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.05"
+                    app:srcCompat="@drawable/ic_baseline_settings"
+                    app:tint="@color/design_default_color_primary" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!--The following is the expandable portion whose
+                visibility is initially set to 'gone'.
+                The parent LinearLayout contains 3 child LinearLayouts
+                that hold a subject name and an icon each.-->
+            <LinearLayout
+                android:id="@+id/hidden_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fixed_layout">
+
+                <!--Child LinearLayout 1-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:text="Database Management"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
+                </LinearLayout>
+
+                <!--Child LinearLayout 2-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:text="Data Structures"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
+                </LinearLayout>
+
+                <!--Child LinearLayout 3-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:text="Operating Systems"
+                        android:textColor="#000000"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
     <Button
         android:id="@+id/watch_in_app"
         android:layout_width="wrap_content"
@@ -16,21 +139,7 @@
         app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.05" />
-
-    <ImageView
-        android:id="@+id/settings"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:contentDescription="@string/settings_hint"
-        app:layout_constraintBottom_toTopOf="@+id/youtube_fragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.05"
-        app:srcCompat="@drawable/ic_baseline_settings"
-        app:tint="@color/design_default_color_primary" />
+        app:layout_constraintVertical_bias="0.35" />
 
     <Button
         android:id="@+id/login"
@@ -127,10 +236,11 @@
         app:layout_constraintTop_toBottomOf="@+id/subreddit_input"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <include
+    <!--<include
         android:id="@+id/settings_view"
         layout="@layout/settings_layout"
         android:visibility="gone"
         />
+        -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

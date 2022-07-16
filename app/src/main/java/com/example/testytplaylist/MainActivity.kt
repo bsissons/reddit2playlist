@@ -8,8 +8,10 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
@@ -104,22 +106,55 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         // Set up the autocomplete field
         setAutoComplete()
 
+        setupSettingsMenu()
+
+        //findViewById<ImageView>(R.id.back_to_app).setOnClickListener {
+        //    setContentView(R.layout.activity_main)
+        //    val view = findViewById<ConstraintLayout>(R.id.settings_view)
+        //    view.visibility = View.GONE
+        //}
+        //setupSettingsSpinner()
+    }
+
+    private fun setupSettingsMenu() {
+        val cardView = findViewById<CardView>(R.id.base_cardview);
+        val settings = findViewById<ImageView>(R.id.settings);
+        val hiddenView = findViewById<LinearLayout>(R.id.hidden_view);
+
         // Settings window
-        findViewById<ImageView>(R.id.settings).setOnClickListener {
+        settings.setOnClickListener {
             //setContentView(R.layout.settings_layout)
             Toast.makeText(this@MainActivity,
                 "Settings button",
                 Toast.LENGTH_SHORT
             ).show()
-            val view = findViewById<ConstraintLayout>(R.id.settings_view)
-            view.visibility = View.VISIBLE
+            //val view = findViewById<ConstraintLayout>(R.id.settings_view)
+            //view.visibility = View.VISIBLE
+
+            // If the CardView is already expanded, set its visibility
+            //  to gone and change the expand less icon to expand more.
+            // If the CardView is already expanded, set its visibility
+            //  to gone and change the expand less icon to expand more.
+            if (hiddenView.visibility == View.VISIBLE) {
+                // The transition of the hiddenView is carried out
+                //  by the TransitionManager class.
+                // Here we use an object of the AutoTransition
+                // Class to create a default transition.
+                TransitionManager.beginDelayedTransition(
+                    cardView,
+                    AutoTransition()
+                )
+                hiddenView.visibility = View.GONE
+                //arrow.setImageResource(R.drawable.ic_baseline_expand_more_24)
+            } else {
+                TransitionManager.beginDelayedTransition(
+                    cardView,
+                    AutoTransition()
+                )
+                hiddenView. visibility = View.VISIBLE
+                //arrow.setImageResource(R.drawable.ic_baseline_expand_less_24)
+            }
         }
-        findViewById<ImageView>(R.id.back_to_app).setOnClickListener {
-            //setContentView(R.layout.activity_main)
-            val view = findViewById<ConstraintLayout>(R.id.settings_view)
-            view.visibility = View.GONE
-        }
-        setupSettingsSpinner()
     }
 
     private fun setupSettingsSpinner() {
@@ -300,7 +335,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                     if (!wasRestored) {
                         youTubePlayer = player
                         //set the player style default
-                        youTubePlayer?.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT)
+                        youTubePlayer?.setPlayerStyle(YouTubePlayer.PlayerStyle.MINIMAL)
                         // Set the callback for video change
                         youTubePlayer?.setPlaylistEventListener(playlistEventListener)
                         //cue the 1st video by default ;)
