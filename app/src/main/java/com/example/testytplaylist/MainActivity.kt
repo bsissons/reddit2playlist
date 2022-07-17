@@ -17,6 +17,7 @@ import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
 import com.google.android.youtube.player.YouTubePlayerSupportFragmentX
 import com.google.android.youtube.player.YouTubeStandalonePlayer
+import com.google.android.youtube.player.internal.r
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -105,25 +106,22 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
 
         // Set up the autocomplete field
         setAutoComplete()
-
+        // Setup settings dropdown
         setupSettingsMenu()
-
-        //findViewById<ImageView>(R.id.back_to_app).setOnClickListener {
-        //    setContentView(R.layout.activity_main)
-        //    val view = findViewById<ConstraintLayout>(R.id.settings_view)
-        //    view.visibility = View.GONE
-        //}
-        //setupSettingsSpinner()
+        // Setup spinner in settings dropdown
+        setupSettingsSpinner()
     }
 
     private fun setupSettingsMenu() {
         val cardView = findViewById<CardView>(R.id.base_cardview);
         val settings = findViewById<ImageView>(R.id.settings);
         val hiddenView = findViewById<LinearLayout>(R.id.hidden_view);
+        val watchInApp = findViewById<Button>(R.id.watch_in_app)
 
         // Settings window
         settings.setOnClickListener {
             //setContentView(R.layout.settings_layout)
+            // TODO remove
             Toast.makeText(this@MainActivity,
                 "Settings button",
                 Toast.LENGTH_SHORT
@@ -145,13 +143,15 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
                     AutoTransition()
                 )
                 hiddenView.visibility = View.GONE
+                watchInApp.visibility = View.VISIBLE
                 //arrow.setImageResource(R.drawable.ic_baseline_expand_more_24)
             } else {
                 TransitionManager.beginDelayedTransition(
                     cardView,
                     AutoTransition()
                 )
-                hiddenView. visibility = View.VISIBLE
+                hiddenView.visibility = View.VISIBLE
+                watchInApp.visibility = View.GONE
                 //arrow.setImageResource(R.drawable.ic_baseline_expand_less_24)
             }
         }
@@ -163,7 +163,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         ArrayAdapter.createFromResource(
             this,
             R.array.number_of_videos,
-            android.R.layout.simple_spinner_item
+            R.layout.spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
