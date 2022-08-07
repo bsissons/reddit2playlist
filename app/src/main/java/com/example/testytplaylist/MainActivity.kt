@@ -17,7 +17,6 @@ import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
 import com.google.android.youtube.player.YouTubePlayerSupportFragmentX
 import com.google.android.youtube.player.YouTubeStandalonePlayer
-import com.google.android.youtube.player.internal.r
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -113,9 +112,9 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     }
 
     private fun setupSettingsMenu() {
-        val cardView = findViewById<CardView>(R.id.base_cardview);
-        val settings = findViewById<ImageView>(R.id.settings);
-        val hiddenView = findViewById<LinearLayout>(R.id.hidden_view);
+        val cardView = findViewById<CardView>(R.id.base_cardview)
+        val settings = findViewById<ImageView>(R.id.settings)
+        val hiddenView = findViewById<LinearLayout>(R.id.hidden_view)
         val watchInApp = findViewById<Button>(R.id.watch_in_app)
 
         // Settings window
