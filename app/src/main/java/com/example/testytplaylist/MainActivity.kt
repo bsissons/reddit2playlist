@@ -1,10 +1,14 @@
 package com.example.testytplaylist
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,16 +25,14 @@ import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.lang.Float.min
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -61,6 +63,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     private var youtubeVideoMap = hashMapOf<String, VideoInfo>()
     private var currentVideoIndex = 0
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -103,6 +106,51 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
             }
         }
 
+        val cardView = findViewById<CardView>(R.id.base_cardview)
+        /*cardView.setOnDragListener(View.OnDragListener{v,e->
+            e.x
+            e.y
+            return@OnDragListener true
+        })*/
+
+        cardView.setOnTouchListener(View.OnTouchListener { view, event ->
+            val cardWidth = cardView.width
+            val displayMetrics = resources.displayMetrics
+            val cardStart = (displayMetrics.widthPixels.toFloat() / 2) - (cardWidth / 2)
+            when (event.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    // get the new coordinate of the event on X-axis
+                    val newX = event.rawX
+                    // carry out swipe only if newX - cardWidth < cardStart, that is
+                    // the card is swiped to the left side, not to the right
+                    if (newX - cardWidth < cardStart) {
+                        cardView.animate()
+                            .x( min(cardStart, newX - (cardWidth / 2)) )
+                            .setDuration(0)
+                            .start()
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    var currentX = cardView.x
+                    cardView.animate()
+                        .x(cardStart)
+                        .setDuration(150)
+                        .setListener(
+                            object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator) {
+                                    cardViewOpenClose()
+                                }
+                            }
+                        )
+                        .start()
+                }
+            }
+
+            // required to by-pass lint warning
+            view.performClick()
+            return@OnTouchListener true
+        })
+
         // Set up the autocomplete field
         setAutoComplete()
         // Setup settings dropdown
@@ -112,47 +160,54 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
     }
 
     private fun setupSettingsMenu() {
-        val cardView = findViewById<CardView>(R.id.base_cardview)
-        val settings = findViewById<ImageView>(R.id.settings)
-        val hiddenView = findViewById<LinearLayout>(R.id.hidden_view)
-        val watchInApp = findViewById<Button>(R.id.watch_in_app)
-
-        // Settings window
-        settings.setOnClickListener {
+        val settings = findViewById<ImageView>(R.id.settings).setOnClickListener {
             //setContentView(R.layout.settings_layout)
             // TODO remove
-            Toast.makeText(this@MainActivity,
-                "Settings button",
-                Toast.LENGTH_SHORT
-            ).show()
+            //Toast.makeText(this@MainActivity,
+            //    "Settings button",
+            //    Toast.LENGTH_SHORT
+            //).show()
             //val view = findViewById<ConstraintLayout>(R.id.settings_view)
             //view.visibility = View.VISIBLE
+            cardViewOpenClose()
+        }
+    }
 
-            // If the CardView is already expanded, set its visibility
-            //  to gone and change the expand less icon to expand more.
-            // If the CardView is already expanded, set its visibility
-            //  to gone and change the expand less icon to expand more.
-            if (hiddenView.visibility == View.VISIBLE) {
-                // The transition of the hiddenView is carried out
-                //  by the TransitionManager class.
-                // Here we use an object of the AutoTransition
-                // Class to create a default transition.
-                TransitionManager.beginDelayedTransition(
-                    cardView,
-                    AutoTransition()
-                )
-                hiddenView.visibility = View.GONE
-                watchInApp.visibility = View.VISIBLE
-                //arrow.setImageResource(R.drawable.ic_baseline_expand_more_24)
-            } else {
-                TransitionManager.beginDelayedTransition(
-                    cardView,
-                    AutoTransition()
-                )
-                hiddenView.visibility = View.VISIBLE
-                watchInApp.visibility = View.GONE
-                //arrow.setImageResource(R.drawable.ic_baseline_expand_less_24)
-            }
+    private fun cardViewOpenClose() {
+        val cardView = findViewById<CardView>(R.id.base_cardview)
+        val hiddenView = findViewById<LinearLayout>(R.id.hidden_view)
+        val watchInApp = findViewById<Button>(R.id.watch_in_app)
+        val settings = findViewById<ImageView>(R.id.settings)
+
+        // If the CardView is already expanded, set its visibility
+        //  to gone and change the expand less icon to expand more.
+        // If the CardView is already expanded, set its visibility
+        //  to gone and change the expand less icon to expand more.
+        if (hiddenView.visibility == View.VISIBLE) {
+            // The transition of the hiddenView is carried out
+            //  by the TransitionManager class.
+            // Here we use an object of the AutoTransition
+            // Class to create a default transition.
+            TransitionManager.beginDelayedTransition(
+                cardView,
+                AutoTransition()
+            )
+            cardView.visibility = View.GONE
+            hiddenView.visibility = View.GONE
+            //watchInApp.visibility = View.VISIBLE
+            settings.visibility = View.VISIBLE
+            //arrow.setImageResource(R.drawable.ic_baseline_expand_more_24)
+        } else {
+            TransitionManager.beginDelayedTransition(
+                cardView,
+                AutoTransition()
+            )
+            cardView.visibility = View.VISIBLE
+            hiddenView.visibility = View.VISIBLE
+            settings.visibility = View.GONE
+            //watchInApp.visibility = View.GONE
+            //watchInApp.visibility = View.GONE
+            //arrow.setImageResource(R.drawable.ic_baseline_expand_less_24)
         }
     }
 
@@ -385,7 +440,7 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         // If there is a JSON exception here then something went wrong (maybe a bad subreddit name)
         try {
             val subredditName = findViewById<TextView>(R.id.subreddit_input).text.toString()
-            val obj = getJsonFromUrl("https://www.reddit.com/r/$subredditName.json?limit=50")
+            val obj = getJsonFromUrl("https://www.reddit.com/r/$subredditName.json?limit=100")
             val data = obj.getJSONObject("data")
             val childArray = data.getJSONArray("children")
             for (i in 0 until childArray.length()) {
@@ -577,5 +632,9 @@ open class MainActivity : BaseYoutubePlaylistActivity() {
         }
         return redUrl
     }
+
+}
+
+private fun CardView.setOnDragListener(function: () -> Unit) {
 
 }

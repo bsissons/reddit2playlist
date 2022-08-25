@@ -10,24 +10,27 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/base_cardview"
         style="@style/Base.CardView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:layout_margin="0dp"
         android:backgroundTint="@color/background"
-        app:layout_constraintBottom_toBottomOf="@id/watch_in_app"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/watch_in_app"
-        app:layout_constraintVertical_bias="0.04">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.00">
 
         <!--This is a ConstraintLayout for the entire CardView
                    including the expandable portion-->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="@+id/base_cardview"
             app:layout_constraintTop_toTopOf="parent"
+            android:padding="60dp"
             app:layout_constraintVertical_bias="0.1" >
 
             <!--This is a ConstraintLayout for the fixed portion
@@ -38,26 +41,14 @@
                 android:id="@+id/fixed_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="5dp"
+                android:padding="0dp"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0">
-
-                <ImageView
-                    android:id="@+id/settings"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:contentDescription="@string/settings_hint"
-                    app:layout_constraintHorizontal_bias="0.1"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.05"
-                    app:srcCompat="@drawable/ic_baseline_settings"
-                    app:tint="@color/design_default_color_primary" />
+                android:background="@color/grey"
+                app:layout_constraintVertical_bias="0.5">
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -67,10 +58,11 @@
                 that hold a subject name and an icon each.-->
             <LinearLayout
                 android:id="@+id/hidden_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="300dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:paddingBottom="0dp"
+                android:background="@color/grey"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -80,35 +72,49 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingTop="10dp"
-                    android:background="@color/white"
-                    app:layout_constraintHorizontal_bias="0.1"
+                    android:paddingTop="0dp"
+                    android:backgroundTint="@color/grey"
+                    app:layout_constraintHorizontal_bias="0.5"
                     android:orientation="horizontal">
                     <Spinner
                         android:id="@+id/num_videos_spinner"
                         android:contentDescription="@string/videos_to_load"
-                        android:padding="1dp"
+                        android:background="@color/background"
+                        android:padding="10dp"
                         android:scaleType="fitCenter"
-                        android:layout_width="200dp"
+                        android:layout_width="75dp"
                         android:layout_height="match_parent"
+                        app:layout_constraintHorizontal_bias="1"
                         android:minHeight="48dp" />
                 </LinearLayout>
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-
+    <ImageView
+        android:id="@+id/settings"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="@string/settings_hint"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.03"
+        app:srcCompat="@drawable/ic_baseline_settings"
+        app:tint="@color/design_default_color_primary" />
     <Button
         android:id="@+id/watch_in_app"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/watch_in_app_button"
-        app:layout_constraintBottom_toTopOf="@+id/youtube_fragment"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35" />
+        app:layout_constraintVertical_bias="0.015" />
 
     <Button
         android:id="@+id/login"

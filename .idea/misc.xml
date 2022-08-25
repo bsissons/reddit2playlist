@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/layout/app_bar_main.xml" value="0.1793478260869565" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/layout/spinner_dropdown_item.xml" value="0.13958333333333334" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/layout/spinner_item.xml" value="0.1793478260869565" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/menu/drawer_menu.xml" value="0.2726495726495726" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/TestYTPlaylist/app/src/main/res/xml/root_preferences.xml" value="0.3670064874884152" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/reddit2playlist/app/src/main/res/layout/activity_main.xml" value="0.15085470085470085" />
